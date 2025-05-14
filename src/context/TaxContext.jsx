@@ -80,26 +80,6 @@ export const TaxProvider = ({ children }) => {
     setCurrentTaxYear(taxYear);
   };
 
-  return (
-    <TaxContext.Provider
-      value={{
-        taxCalculation,
-        provisionalTax,
-        taxBrackets,
-        loading,
-        error,
-        currentTaxYear,
-        fetchTaxCalculation,
-        fetchProvisionalTax,
-        fetchTaxBrackets,
-        changeTaxYear
-      }}
-    >
-      {children}
-    </TaxContext.Provider>
-  );
-};
-
 const calculateCustomTaxCalculation = async (calculationData) => {
   if (!currentUser) return;
   
@@ -139,4 +119,4 @@ return (
   >
     {children}
   </TaxContext.Provider>
-);
+)};
