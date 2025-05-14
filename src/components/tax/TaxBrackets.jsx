@@ -1,50 +1,24 @@
+// src/components/tax/TaxBrackets.jsx
 import React, { useState, useEffect } from 'react';
-
-// Mock tax brackets data for 2024-2025
-const MOCK_TAX_BRACKETS = [
-  { lower_limit: 1, upper_limit: 237100, rate: 0.18, base_amount: 0, tax_year: "2024-2025" },
-  { lower_limit: 237101, upper_limit: 370500, rate: 0.26, base_amount: 42678, tax_year: "2024-2025" },
-  { lower_limit: 370501, upper_limit: 512800, rate: 0.31, base_amount: 77362, tax_year: "2024-2025" },
-  { lower_limit: 512801, upper_limit: 673000, rate: 0.36, base_amount: 121475, tax_year: "2024-2025" },
-  { lower_limit: 673001, upper_limit: 857900, rate: 0.39, base_amount: 179147, tax_year: "2024-2025" },
-  { lower_limit: 857901, upper_limit: 1817000, rate: 0.41, base_amount: 251258, tax_year: "2024-2025" },
-  { lower_limit: 1817001, upper_limit: null, rate: 0.45, base_amount: 644489, tax_year: "2024-2025" },
-];
-
-// Mock tax years available
-const AVAILABLE_TAX_YEARS = ["2024-2025", "2023-2024", "2022-2023"];
+import { useTaxCalc } from '../../hooks/useTaxCalc';
+import Loading from '../common/Loading';
+import Alert from '../common/Alert';
 
 const TaxBrackets = () => {
-  const [taxBrackets, setTaxBrackets] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { taxBrackets, loading, error, fetchTaxBrackets } = useTaxCalc();
   const [selectedYear, setSelectedYear] = useState("2024-2025");
+  
+  // Available tax years
+  const AVAILABLE_TAX_YEARS = ["2024-2025", "2023-2024", "2022-2023"];
 
   useEffect(() => {
-    const fetchTaxBrackets = async () => {
-      setLoading(true);
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // In a real app, this would be an API call like:
-        // const response = await api.get(`/tax/tax-brackets/?tax_year=${selectedYear}`);
-        // setTaxBrackets(response.data);
-        
-        setTaxBrackets(MOCK_TAX_BRACKETS);
-      } catch (err) {
-        console.error('Error fetching tax brackets:', err);
-        setError('Failed to load tax brackets. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTaxBrackets();
-  }, [selectedYear]);
+    fetchTaxBrackets(selectedYear);
+  }, [selectedYear, fetchTaxBrackets]);
 
   // Format currency values
   const formatCurrency = (value) => {
+    if (value === null) return 'and above';
+    
     return new Intl.NumberFormat('en-ZA', { 
       style: 'currency', 
       currency: 'ZAR',
@@ -66,16 +40,14 @@ const TaxBrackets = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-24">
-        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-indigo-500"></div>
+        <Loading />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-        <p>{error}</p>
-      </div>
+      <Alert type="error" message={error} />
     );
   }
 
@@ -106,44 +78,50 @@ const TaxBrackets = () => {
       </div>
       
       <div className="px-6 py-4">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Taxable Income
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rate
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Base Amount
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {taxBrackets.map((bracket, index) => (
-                <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {bracket.upper_limit 
-                      ? `${formatCurrency(bracket.lower_limit)} - ${formatCurrency(bracket.upper_limit)}`
-                      : `${formatCurrency(bracket.lower_limit)} and above`
-                    }
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatPercentage(bracket.rate)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {bracket.base_amount > 0 
-                      ? `${formatCurrency(bracket.base_amount)} + ${formatPercentage(bracket.rate)} of amount above ${formatCurrency(bracket.lower_limit - 1)}`
-                      : formatPercentage(bracket.rate)
-                    }
-                  </td>
+        {Array.isArray(taxBrackets) && taxBrackets.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Taxable Income
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Rate
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Base Amount
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {taxBrackets.map((bracket, index) => (
+                  <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {bracket.upper_limit 
+                        ? `${formatCurrency(bracket.lower_limit)} - ${formatCurrency(bracket.upper_limit)}`
+                        : `${formatCurrency(bracket.lower_limit)} ${formatCurrency(bracket.upper_limit)}`
+                      }
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {formatPercentage(bracket.rate)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {bracket.base_amount > 0 
+                        ? `${formatCurrency(bracket.base_amount)} + ${formatPercentage(bracket.rate)} of amount above ${formatCurrency(bracket.lower_limit - 1)}`
+                        : formatPercentage(bracket.rate)
+                      }
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center py-4">
+            <p className="text-gray-500">No tax bracket information available for {selectedYear}.</p>
+          </div>
+        )}
       </div>
       
       <div className="px-6 py-4 bg-gray-50">

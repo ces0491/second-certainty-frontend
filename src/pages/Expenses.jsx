@@ -15,8 +15,8 @@ const Expenses = () => {
     error, 
     currentTaxYear, 
     changeTaxYear, 
-    addExpense, 
-    deleteExpense 
+    addExpense: addExpenseItem, 
+    deleteExpense: deleteExpenseItem 
   } = useExpenses();
   
   const [isAddingExpense, setIsAddingExpense] = useState(false);
@@ -35,7 +35,7 @@ const Expenses = () => {
     const { name, value, type } = e.target;
     setNewExpense({
       ...newExpense,
-      [name]: type === 'number' ? Number(value) : value
+      [name]: type === 'number' ? (value === '' ? '' : Number(value)) : value
     });
   };
   
@@ -48,10 +48,13 @@ const Expenses = () => {
     }
     
     try {
-      const result = await addExpense({
+      // Ensure amount is a number
+      const expenseData = {
         ...newExpense,
-        tax_year: currentTaxYear
-      });
+        amount: Number(newExpense.amount)
+      };
+      
+      const result = await addExpenseItem(expenseData);
       
       if (result.success) {
         // Reset form
@@ -67,10 +70,9 @@ const Expenses = () => {
       } else {
         setFormError(result.error || 'Failed to add expense.');
       }
-      
     } catch (err) {
       console.error('Error adding expense:', err);
-      setFormError('An unexpected error occurred. Please try again.');
+      setFormError(err.message || 'An unexpected error occurred. Please try again.');
     }
   };
   
@@ -81,20 +83,24 @@ const Expenses = () => {
     }
     
     try {
-      const result = await deleteExpense(id);
+      const result = await deleteExpenseItem(id);
       
       if (!result.success) {
         setFormError(result.error || 'Failed to delete expense.');
       }
-      
     } catch (err) {
       console.error('Error deleting expense:', err);
-      setFormError('An unexpected error occurred. Please try again.');
+      setFormError(err.message || 'An unexpected error occurred. Please try again.');
     }
   };
   
   // Calculate total expenses
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  
+  // Handle tax year change
+  const handleTaxYearChange = (e) => {
+    changeTaxYear(e.target.value);
+  };
   
   if (loading && !expenses.length) {
     return <Loading />;
@@ -108,7 +114,7 @@ const Expenses = () => {
           <select
             className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             value={currentTaxYear}
-            onChange={(e) => changeTaxYear(e.target.value)}
+            onChange={handleTaxYearChange}
           >
             {TAX_YEARS.map((year) => (
               <option key={year} value={year}>{year}</option>
@@ -123,12 +129,8 @@ const Expenses = () => {
         </div>
       </div>
       
-      {error && (
-        <Alert type="error" message={error} onDismiss={() => setFormError('')} />
-      )}
-      
-      {formError && (
-        <Alert type="error" message={formError} onDismiss={() => setFormError('')} />
+      {(error || formError) && (
+        <Alert type="error" message={error || formError} onDismiss={() => setFormError('')} />
       )}
       
       {/* Add Expense Panel */}

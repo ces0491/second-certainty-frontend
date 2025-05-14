@@ -1,27 +1,14 @@
+// src/components/tax/TaxCalculation.jsx
 import React, { useState, useEffect } from 'react';
-
-// Mock tax data
-const MOCK_TAX_RESULT = {
-  gross_income: 750000,
-  taxable_income: 685000,
-  tax_before_rebates: 210000,
-  rebates: 17235,
-  medical_credits: 3500,
-  final_tax: 189265,
-  effective_tax_rate: 0.2762,
-  monthly_tax_rate: 0.023
-};
-
-// Mock expense types
-const MOCK_EXPENSE_TYPES = [
-  { id: 1, name: 'Retirement Annuity Contributions', description: 'Contributions to retirement annuities', max_percentage: 27.5 },
-  { id: 2, name: 'Medical Expenses', description: 'Out-of-pocket medical expenses not covered by medical aid' },
-  { id: 3, name: 'Home Office Expenses', description: 'Expenses for maintaining a home office if you work from home' },
-  { id: 4, name: 'Donations to Public Benefit Organizations', description: 'Donations to approved public benefit organizations', max_percentage: 10 },
-  { id: 5, name: 'Travel Expenses', description: 'Business-related travel expenses' }
-];
+import { useTaxCalc } from '../../hooks/useTaxCalc';
+import { useAuth } from '../../hooks/useAuth';
+import Loading from '../common/Loading';
+import Alert from '../common/Alert';
 
 const TaxCalculator = () => {
+  const { currentUser } = useAuth();
+  const { taxBrackets, calculateCustomTax } = useTaxCalc();
+  
   // Tax calculation inputs
   const [income, setIncome] = useState(750000);
   const [age, setAge] = useState(35);
@@ -52,70 +39,26 @@ const TaxCalculator = () => {
     setError(null);
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // In a real application, this would be an API call
-      // const result = await calculateTaxApi(
-      //   currentUser.id, 
-      //   { income, age, expenses, taxYear }
-      // );
-      
-      // For demo purposes, modify the mock data based on inputs
-      const totalExpenses = Object.values(expenses).reduce((sum, val) => sum + val, 0);
-      const taxableIncome = Math.max(0, income - totalExpenses);
-      
-      // Simple tax calculation (in production, this would come from the API)
-      let taxBeforeRebates = 0;
-      
-      if (taxableIncome <= 237100) {
-        taxBeforeRebates = taxableIncome * 0.18;
-      } else if (taxableIncome <= 370500) {
-        taxBeforeRebates = 42678 + (taxableIncome - 237100) * 0.26;
-      } else if (taxableIncome <= 512800) {
-        taxBeforeRebates = 77362 + (taxableIncome - 370500) * 0.31;
-      } else if (taxableIncome <= 673000) {
-        taxBeforeRebates = 121475 + (taxableIncome - 512800) * 0.36;
-      } else if (taxableIncome <= 857900) {
-        taxBeforeRebates = 179147 + (taxableIncome - 673000) * 0.39;
-      } else if (taxableIncome <= 1817000) {
-        taxBeforeRebates = 251258 + (taxableIncome - 857900) * 0.41;
-      } else {
-        taxBeforeRebates = 644489 + (taxableIncome - 1817000) * 0.45;
-      }
-      
-      // Calculate rebates based on age
-      let rebates = 17235; // Primary rebate
-      if (age >= 65) rebates += 9444; // Secondary rebate
-      if (age >= 75) rebates += 3145; // Tertiary rebate
-      
-      // Medical credits (simplified)
-      const medicalCredits = 347 * 12; // R347 per month for main member
-      
-      // Final tax
-      const finalTax = Math.max(0, taxBeforeRebates - rebates - medicalCredits);
-      
-      // Calculate effective tax rate
-      const effectiveTaxRate = taxableIncome > 0 ? finalTax / taxableIncome : 0;
-      
-      // Calculate monthly tax rate
-      const monthlyTaxRate = income > 0 ? finalTax / (income * 12) : 0;
-      
-      const result = {
-        gross_income: income,
-        taxable_income: taxableIncome,
-        tax_before_rebates: taxBeforeRebates,
-        rebates: rebates,
-        medical_credits: medicalCredits,
-        final_tax: finalTax,
-        effective_tax_rate: effectiveTaxRate,
-        monthly_tax_rate: monthlyTaxRate
+      // Prepare the custom tax calculation data
+      const customTaxData = {
+        income: income,
+        age: age,
+        expenses: {
+          retirement: expenses.retirement,
+          medical: expenses.medical,
+          donations: expenses.donations,
+          home_office: expenses.homeOffice,
+          travel: expenses.travel
+        },
+        tax_year: taxYear
       };
-      
+    
+      // Call the custom tax calculator function from context
+      const result = await calculateCustomTax(customTaxData);
       setCalculationResult(result);
     } catch (err) {
       console.error('Error calculating tax:', err);
-      setError('Failed to calculate tax. Please try again.');
+      setError(err.message || 'Failed to calculate tax. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -160,9 +103,7 @@ const TaxCalculator = () => {
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Tax Calculator</h1>
       
       {error && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-          <p>{error}</p>
-        </div>
+        <Alert type="error" message={error} />
       )}
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -324,7 +265,7 @@ const TaxCalculator = () => {
             
             {loading ? (
               <div className="flex justify-center items-center p-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+                <Loading />
               </div>
             ) : calculationResult ? (
               <div className="p-6">
@@ -428,7 +369,7 @@ const TaxCalculator = () => {
                 
                 {/* Tax Savings Info */}
                 {(calculationResult.gross_income - calculationResult.taxable_income) > 0 && (
-                  <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="mt-6 bg-green-50 border-l-4 border-green-500 text-green-700 p-4">
                     <h3 className="text-lg font-medium text-green-800 mb-2">
                       Tax Savings Summary
                     </h3>
@@ -439,7 +380,7 @@ const TaxCalculator = () => {
                 )}
                 
                 {/* Optimization Tips */}
-                <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="mt-6 bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4">
                   <h3 className="text-lg font-medium text-blue-800 mb-2">
                     Tax Optimization Tips
                   </h3>

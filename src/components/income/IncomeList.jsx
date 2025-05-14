@@ -1,13 +1,11 @@
+// src/components/income/IncomeList.jsx
 import React, { useState, useEffect } from 'react';
+import { useIncome } from '../../hooks/useIncome';
+import { useAuth } from '../../hooks/useAuth';
+import Loading from '../common/Loading';
+import Alert from '../common/Alert';
 
-// Mock income data
-const MOCK_INCOMES = [
-  { id: 1, source_type: 'Salary', description: 'Main employment', annual_amount: 600000, is_paye: true, tax_year: '2024-2025' },
-  { id: 2, source_type: 'Rental', description: 'Property investment', annual_amount: 120000, is_paye: false, tax_year: '2024-2025' },
-  { id: 3, source_type: 'Interest', description: 'Savings account', annual_amount: 30000, is_paye: false, tax_year: '2024-2025' }
-];
-
-// Mock income source types
+// Keep the income source types (this could be fetched from API later)
 const INCOME_SOURCE_TYPES = [
   'Salary',
   'Rental',
@@ -19,10 +17,19 @@ const INCOME_SOURCE_TYPES = [
 ];
 
 const IncomeManagement = () => {
-  const [incomes, setIncomes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { currentUser } = useAuth();
+  const { 
+    incomes, 
+    loading, 
+    error, 
+    currentTaxYear, 
+    changeTaxYear,
+    addIncome: addIncomeItem,
+    deleteIncome: deleteIncomeItem
+  } = useIncome();
+  
   const [isAddingIncome, setIsAddingIncome] = useState(false);
+  const [formError, setFormError] = useState('');
   
   // New income form state
   const [newIncome, setNewIncome] = useState({
@@ -30,35 +37,11 @@ const IncomeManagement = () => {
     description: '',
     annual_amount: '',
     is_paye: false,
-    tax_year: '2024-2025'
+    tax_year: currentTaxYear
   });
   
   // Available tax years
   const TAX_YEARS = ['2024-2025', '2023-2024'];
-  
-  // Load income data
-  useEffect(() => {
-    const fetchIncomes = async () => {
-      setLoading(true);
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // In a real application, this would be an API call
-        // const response = await getIncomes(currentUser.id);
-        // setIncomes(response);
-        
-        setIncomes(MOCK_INCOMES);
-      } catch (err) {
-        console.error('Error loading income data:', err);
-        setError('Failed to load income data. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchIncomes();
-  }, []);
   
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -73,46 +56,38 @@ const IncomeManagement = () => {
   const handleAddIncome = async () => {
     // Validate form
     if (!newIncome.source_type || !newIncome.annual_amount || !newIncome.tax_year) {
-      setError('Please fill in all required fields.');
+      setFormError('Please fill in all required fields.');
       return;
     }
     
     try {
-      setLoading(true);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // In a real application, this would be an API call
-      // const response = await addIncome(currentUser.id, newIncome);
-      
-      // Create a new mock income with ID
-      const mockResponse = {
+      // Convert annual_amount to number
+      const incomeData = {
         ...newIncome,
-        id: Math.max(...incomes.map(income => income.id), 0) + 1,
         annual_amount: Number(newIncome.annual_amount)
       };
       
-      // Add to incomes
-      setIncomes([...incomes, mockResponse]);
+      const result = await addIncomeItem(incomeData);
       
-      // Reset form
-      setNewIncome({
-        source_type: '',
-        description: '',
-        annual_amount: '',
-        is_paye: false,
-        tax_year: '2024-2025'
-      });
-      
-      // Close form
-      setIsAddingIncome(false);
-      
+      if (result.success) {
+        // Reset form
+        setNewIncome({
+          source_type: '',
+          description: '',
+          annual_amount: '',
+          is_paye: false,
+          tax_year: currentTaxYear
+        });
+        
+        // Close form
+        setIsAddingIncome(false);
+        setFormError('');
+      } else {
+        setFormError(result.error || 'Failed to add income. Please try again.');
+      }
     } catch (err) {
       console.error('Error adding income:', err);
-      setError('Failed to add income. Please try again.');
-    } finally {
-      setLoading(false);
+      setFormError(err.message || 'Failed to add income. Please try again.');
     }
   };
   
@@ -123,22 +98,10 @@ const IncomeManagement = () => {
     }
     
     try {
-      setLoading(true);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // In a real application, this would be an API call
-      // await deleteIncome(currentUser.id, id);
-      
-      // Remove from state
-      setIncomes(incomes.filter(income => income.id !== id));
-      
+      await deleteIncomeItem(id);
     } catch (err) {
       console.error('Error deleting income:', err);
-      setError('Failed to delete income. Please try again.');
-    } finally {
-      setLoading(false);
+      setFormError(err.message || 'Failed to delete income. Please try again.');
     }
   };
   
@@ -155,28 +118,42 @@ const IncomeManagement = () => {
   // Calculate total income
   const totalIncome = incomes.reduce((sum, income) => sum + income.annual_amount, 0);
   
+  // Handle tax year change
+  const handleTaxYearChange = (e) => {
+    changeTaxYear(e.target.value);
+    
+    // Update new income form tax year
+    setNewIncome({
+      ...newIncome,
+      tax_year: e.target.value
+    });
+  };
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Income Management</h1>
-        <button
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          onClick={() => setIsAddingIncome(!isAddingIncome)}
-        >
-          {isAddingIncome ? 'Cancel' : 'Add Income Source'}
-        </button>
-      </div>
-      
-      {error && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-          <p>{error}</p>
-          <button
-            className="ml-2 text-red-700 hover:text-red-900"
-            onClick={() => setError(null)}
+        <div className="flex items-center space-x-4">
+          <select
+            className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            value={currentTaxYear}
+            onChange={handleTaxYearChange}
           >
-            Dismiss
+            {TAX_YEARS.map((year) => (
+              <option key={year} value={year}>{year}</option>
+            ))}
+          </select>
+          <button
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            onClick={() => setIsAddingIncome(!isAddingIncome)}
+          >
+            {isAddingIncome ? 'Cancel' : 'Add Income Source'}
           </button>
         </div>
+      </div>
+      
+      {(error || formError) && (
+        <Alert type="error" message={error || formError} onDismiss={() => setFormError('')} />
       )}
       
       {/* Add Income Panel */}
@@ -282,7 +259,7 @@ const IncomeManagement = () => {
         <div className="flex flex-col md:flex-row md:justify-between md:items-center">
           <div>
             <h2 className="text-xl font-medium text-gray-800">Income Summary</h2>
-            <p className="text-gray-600">Tax Year: 2024-2025</p>
+            <p className="text-gray-600">Tax Year: {currentTaxYear}</p>
           </div>
           <div className="mt-4 md:mt-0">
             <p className="text-sm text-gray-600">Total Annual Income</p>
@@ -297,9 +274,9 @@ const IncomeManagement = () => {
           <h2 className="text-xl font-medium text-gray-800">Income Sources</h2>
         </div>
         
-        {loading && incomes.length === 0 ? (
+        {loading ? (
           <div className="flex justify-center items-center p-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+            <Loading />
           </div>
         ) : incomes.length === 0 ? (
           <div className="p-6 text-center">
@@ -350,7 +327,7 @@ const IncomeManagement = () => {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
                         onClick={() => handleDeleteIncome(income.id)}
                         className="text-red-600 hover:text-red-900"

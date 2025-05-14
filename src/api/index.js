@@ -1,8 +1,8 @@
+// src/api/index.js
 import axios from 'axios';
 
-// Create axios instance with base URL from environment variables
-// In development, this might be http://localhost:8000/api
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+// Update with the real API URL
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://second-certainty.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -33,7 +33,20 @@ api.interceptors.response.use(
       // Redirect to login page
       window.location.href = '/login';
     }
-    return Promise.reject(error);
+    
+    // Create standardized error object 
+    const errorResponse = {
+      message: error.response?.data?.detail || 'An error occurred',
+      status: error.response?.status,
+      data: error.response?.data
+    };
+    
+    // Log errors in development
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('API Error:', errorResponse);
+    }
+    
+    return Promise.reject(errorResponse);
   }
 );
 

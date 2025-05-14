@@ -173,3 +173,23 @@ export const updateTaxData = async () => {
     throw error.response ? error.response.data : new Error('Failed to update tax data');
   }
 };
+
+/**
+ * Calculate tax based on custom parameters
+ * @param {number} userId - User ID
+ * @param {Object} calculationData - Custom calculation parameters
+ * @param {number} calculationData.income - Gross annual income
+ * @param {number} calculationData.age - Age as of end of tax year
+ * @param {Object} calculationData.expenses - Deductible expenses
+ * @param {string} [calculationData.tax_year] - Tax year in format "YYYY-YYYY"
+ * @returns {Promise} - API response promise with tax calculation
+ */
+export const calculateCustomTax = async (userId, calculationData) => {
+  try {
+    const params = calculationData.tax_year ? { tax_year: calculationData.tax_year } : {};
+    const response = await api.post(`/tax/users/${userId}/custom-tax-calculation/`, calculationData, { params });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Failed to calculate tax');
+  }
+};
