@@ -42,7 +42,7 @@ const IncomeManagement = () => {
   });
   
   // Available tax years
-  const TAX_YEARS = ['2024-2025', '2023-2024'];
+  const TAX_YEARS = ['2025-2026', '2024-2025', '2023-2024', '2022-2023'];
   
   // Handle form input changes
   const handleInputChange = (e) => {

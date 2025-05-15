@@ -27,8 +27,8 @@ const TaxCalculator = () => {
   const [error, setError] = useState(null);
   
   // Tax years
-  const [taxYear, setTaxYear] = useState('2024-2025');
-  const TAX_YEARS = ['2024-2025', '2023-2024'];
+  const [taxYear, setTaxYear] = useState('2025-2026');
+  const TAX_YEARS = ['2025-2026', '2024-2025', '2023-2024', '2022-2023'];
   
   // Calculate tax - wrapped in useCallback
   const calculateTax = useCallback(async () => {

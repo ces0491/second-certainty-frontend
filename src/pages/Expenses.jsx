@@ -1,15 +1,13 @@
 // src/pages/Expenses.jsx
 import React, { useState } from 'react';
 import { useExpenses } from '../hooks/useExpenses';
-// Remove currentUser from destructuring if not used
 import { useAuth } from '../hooks/useAuth';
 import Loading from '../components/common/Loading';
 import Alert from '../components/common/Alert';
 import { formatCurrency } from '../utils/formatCurrency';
 
 const Expenses = () => {
-  // Remove currentUser if not used
-  const { /* currentUser */ } = useAuth();
+  const { currentUser } = useAuth();
   const { 
     expenses, 
     expenseTypes, 
@@ -30,7 +28,7 @@ const Expenses = () => {
   });
   
   // Available tax years
-  const TAX_YEARS = ['2024-2025', '2023-2024'];
+  const TAX_YEARS = ['2025-2026', '2024-2025', '2023-2024', '2022-2023'];
   
   // Handle form input changes
   const handleInputChange = (e) => {

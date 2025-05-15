@@ -9,7 +9,7 @@ export const IncomeProvider = ({ children }) => {
   const [incomes, setIncomes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [currentTaxYear, setCurrentTaxYear] = useState('2024-2025');
+  const [currentTaxYear, setCurrentTaxYear] = useState('2025-2026');
   const { currentUser } = useContext(AuthContext);
 
   // Use useCallback for fetchIncomes to prevent infinite loops

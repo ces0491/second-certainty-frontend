@@ -6,10 +6,10 @@ import Alert from '../common/Alert';
 
 const TaxBrackets = () => {
   const { taxBrackets, loading, error, fetchTaxBrackets } = useTaxCalc();
-  const [selectedYear, setSelectedYear] = useState("2024-2025");
+  const [selectedYear, setSelectedYear] = useState("2025-2026");
   
   // Available tax years
-  const AVAILABLE_TAX_YEARS = ["2024-2025", "2023-2024", "2022-2023"];
+  const AVAILABLE_TAX_YEARS = ["2025-2026", "2024-2025", "2023-2024", "2022-2023"];
 
   useEffect(() => {
     fetchTaxBrackets(selectedYear);
