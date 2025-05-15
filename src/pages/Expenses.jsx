@@ -1,13 +1,15 @@
 // src/pages/Expenses.jsx
 import React, { useState } from 'react';
 import { useExpenses } from '../hooks/useExpenses';
+// Remove currentUser from destructuring if not used
 import { useAuth } from '../hooks/useAuth';
 import Loading from '../components/common/Loading';
 import Alert from '../components/common/Alert';
 import { formatCurrency } from '../utils/formatCurrency';
 
 const Expenses = () => {
-  const { currentUser } = useAuth();
+  // Remove currentUser if not used
+  const { /* currentUser */ } = useAuth();
   const { 
     expenses, 
     expenseTypes, 

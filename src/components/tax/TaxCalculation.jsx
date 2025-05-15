@@ -1,13 +1,14 @@
 // src/components/tax/TaxCalculation.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTaxCalc } from '../../hooks/useTaxCalc';
 import { useAuth } from '../../hooks/useAuth';
 import Loading from '../common/Loading';
 import Alert from '../common/Alert';
 
 const TaxCalculator = () => {
-  const { currentUser } = useAuth();
-  const { taxBrackets, calculateCustomTax } = useTaxCalc();
+  // Don't destructure currentUser and taxBrackets since they're not used
+  const { } = useAuth();
+  const { calculateCustomTax } = useTaxCalc();
   
   // Tax calculation inputs
   const [income, setIncome] = useState(750000);
@@ -29,12 +30,8 @@ const TaxCalculator = () => {
   const [taxYear, setTaxYear] = useState('2024-2025');
   const TAX_YEARS = ['2024-2025', '2023-2024'];
   
-  // Calculate tax on input changes
-  useEffect(() => {
-    calculateTax();
-  }, [income, age, expenses, taxYear]);
-  
-  const calculateTax = async () => {
+  // Calculate tax - wrapped in useCallback
+  const calculateTax = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -62,7 +59,12 @@ const TaxCalculator = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [income, age, expenses, taxYear, calculateCustomTax]); // Include all dependencies
+  
+  // Calculate tax on input changes - now with proper dependencies
+  useEffect(() => {
+    calculateTax();
+  }, [calculateTax]); // calculateTax includes all necessary dependencies
   
   // Format currency
   const formatCurrency = (value) => {

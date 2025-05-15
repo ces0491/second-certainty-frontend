@@ -1,5 +1,5 @@
 // src/context/IncomeContext.jsx
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { getIncomes, addIncome, updateIncome, deleteIncome } from '../api/income';
 import { AuthContext } from './AuthContext';
 
@@ -12,7 +12,8 @@ export const IncomeProvider = ({ children }) => {
   const [currentTaxYear, setCurrentTaxYear] = useState('2024-2025');
   const { currentUser } = useContext(AuthContext);
 
-  const fetchIncomes = async () => {
+  // Use useCallback for fetchIncomes to prevent infinite loops
+  const fetchIncomes = useCallback(async () => {
     if (!currentUser) return;
     
     setLoading(true);
@@ -27,15 +28,17 @@ export const IncomeProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser, currentTaxYear]); // Include all dependencies
 
+  // Effect to fetch incomes when user or tax year changes
   useEffect(() => {
     if (currentUser) {
       fetchIncomes();
     }
-  }, [currentUser, currentTaxYear]);
+  }, [currentUser, currentTaxYear, fetchIncomes]); // Now includes fetchIncomes
 
-  const addIncomeItem = async (incomeData) => {
+  // Other methods can be converted to useCallback too for consistency
+  const addIncomeItem = useCallback(async (incomeData) => {
     setLoading(true);
     setError(null);
     
@@ -52,9 +55,9 @@ export const IncomeProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser, currentTaxYear, incomes]);
 
-  const updateIncomeItem = async (incomeId, incomeData) => {
+  const updateIncomeItem = useCallback(async (incomeId, incomeData) => {
     setLoading(true);
     setError(null);
     
@@ -68,9 +71,9 @@ export const IncomeProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser, incomes]);
 
-  const deleteIncomeItem = async (incomeId) => {
+  const deleteIncomeItem = useCallback(async (incomeId) => {
     setLoading(true);
     setError(null);
     
@@ -84,11 +87,11 @@ export const IncomeProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser, incomes]);
 
-  const changeTaxYear = (taxYear) => {
+  const changeTaxYear = useCallback((taxYear) => {
     setCurrentTaxYear(taxYear);
-  };
+  }, []);
 
   return (
     <IncomeContext.Provider

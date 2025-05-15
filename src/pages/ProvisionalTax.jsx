@@ -16,7 +16,7 @@ const ProvisionalTax = () => {
     if (!provisionalTax) {
       fetchProvisionalTax();
     }
-  }, []);
+  }, [provisionalTax, fetchProvisionalTax]);
   
   if (!currentUser?.is_provisional_taxpayer) {
     return (

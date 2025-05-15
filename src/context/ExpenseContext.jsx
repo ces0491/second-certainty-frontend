@@ -1,5 +1,5 @@
 // src/context/ExpenseContext.jsx
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { getExpenses, addExpense, updateExpense, deleteExpense, getExpenseTypes } from '../api/expenses';
 import { AuthContext } from './AuthContext';
 
@@ -13,7 +13,8 @@ export const ExpenseProvider = ({ children }) => {
   const [currentTaxYear, setCurrentTaxYear] = useState('2024-2025');
   const { currentUser } = useContext(AuthContext);
 
-  const fetchExpenses = async () => {
+  // Use useCallback for fetchExpenses to prevent infinite loops
+  const fetchExpenses = useCallback(async () => {
     if (!currentUser) return;
     
     setLoading(true);
@@ -28,9 +29,10 @@ export const ExpenseProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser, currentTaxYear]); // Include dependencies
 
-  const fetchExpenseTypes = async () => {
+  // Use useCallback for fetchExpenseTypes too
+  const fetchExpenseTypes = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -43,19 +45,22 @@ export const ExpenseProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // No dependencies since it doesn't depend on any state or props
 
+  // Effect to fetch expense types on mount
   useEffect(() => {
     fetchExpenseTypes();
-  }, []);
+  }, [fetchExpenseTypes]);
 
+  // Effect to fetch expenses when user or tax year changes
   useEffect(() => {
     if (currentUser) {
       fetchExpenses();
     }
-  }, [currentUser, currentTaxYear]);
+  }, [currentUser, currentTaxYear, fetchExpenses]); // Now includes fetchExpenses as a dependency
 
-  const addExpenseItem = async (expenseData) => {
+  // Other methods can be converted to useCallback too for consistency
+  const addExpenseItem = useCallback(async (expenseData) => {
     setLoading(true);
     setError(null);
     
@@ -72,9 +77,9 @@ export const ExpenseProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser, currentTaxYear, expenses]);
 
-  const updateExpenseItem = async (expenseId, expenseData) => {
+  const updateExpenseItem = useCallback(async (expenseId, expenseData) => {
     setLoading(true);
     setError(null);
     
@@ -88,9 +93,9 @@ export const ExpenseProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser, expenses]);
 
-  const deleteExpenseItem = async (expenseId) => {
+  const deleteExpenseItem = useCallback(async (expenseId) => {
     setLoading(true);
     setError(null);
     
@@ -104,11 +109,11 @@ export const ExpenseProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser, expenses]);
 
-  const changeTaxYear = (taxYear) => {
+  const changeTaxYear = useCallback((taxYear) => {
     setCurrentTaxYear(taxYear);
-  };
+  }, []);
 
   return (
     <ExpenseContext.Provider

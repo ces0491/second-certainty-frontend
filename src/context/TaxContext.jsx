@@ -1,5 +1,5 @@
 // src/context/TaxContext.jsx
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { calculateTax, calculateCustomTax, calculateProvisionalTax, getTaxBrackets } from '../api/taxCalculator';
 import { AuthContext } from './AuthContext';
 
@@ -14,7 +14,8 @@ export const TaxProvider = ({ children }) => {
   const [currentTaxYear, setCurrentTaxYear] = useState('2024-2025');
   const { currentUser } = useContext(AuthContext);
 
-  const fetchTaxCalculation = async () => {
+  // Use useCallback for tax calculation functions
+  const fetchTaxCalculation = useCallback(async () => {
     if (!currentUser) return;
     
     setLoading(true);
@@ -29,9 +30,9 @@ export const TaxProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser, currentTaxYear]);
 
-  const fetchProvisionalTax = async () => {
+  const fetchProvisionalTax = useCallback(async () => {
     if (!currentUser || !currentUser.is_provisional_taxpayer) return;
     
     setLoading(true);
@@ -46,14 +47,14 @@ export const TaxProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser, currentTaxYear]);
 
-  const fetchTaxBrackets = async () => {
+  const fetchTaxBrackets = useCallback(async (year = currentTaxYear) => {
     setLoading(true);
     setError(null);
     
     try {
-      const data = await getTaxBrackets(currentTaxYear);
+      const data = await getTaxBrackets(year);
       setTaxBrackets(data);
     } catch (err) {
       console.error('Error fetching tax brackets:', err);
@@ -61,12 +62,14 @@ export const TaxProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentTaxYear]); // Depending on currentTaxYear by default
 
+  // Effect to fetch tax brackets on mount or when tax year changes
   useEffect(() => {
     fetchTaxBrackets();
-  }, [currentTaxYear]);
+  }, [currentTaxYear, fetchTaxBrackets]); // Now includes fetchTaxBrackets
 
+  // Effect to fetch tax calculation and provisional tax when user or tax year changes
   useEffect(() => {
     if (currentUser) {
       fetchTaxCalculation();
@@ -74,49 +77,50 @@ export const TaxProvider = ({ children }) => {
         fetchProvisionalTax();
       }
     }
-  }, [currentUser, currentTaxYear]);
+  }, [currentUser, currentTaxYear, fetchTaxCalculation, fetchProvisionalTax]); // Now includes all dependencies
 
-  const changeTaxYear = (taxYear) => {
+  const changeTaxYear = useCallback((taxYear) => {
     setCurrentTaxYear(taxYear);
-  };
+  }, []);
 
-const calculateCustomTaxCalculation = async (calculationData) => {
-  if (!currentUser) return;
-  
-  setLoading(true);
-  setError(null);
-  
-  try {
-    const data = await calculateCustomTax(currentUser.id, calculationData);
-    return data;
-  } catch (err) {
-    console.error('Error calculating custom tax:', err);
-    setError(typeof err === 'object' && err.message 
-      ? err.message 
-      : 'Failed to calculate custom tax');
-    throw err;
-  } finally {
-    setLoading(false);
-  }
+  const calculateCustomTaxCalculation = useCallback(async (calculationData) => {
+    if (!currentUser) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const data = await calculateCustomTax(currentUser.id, calculationData);
+      return data;
+    } catch (err) {
+      console.error('Error calculating custom tax:', err);
+      setError(typeof err === 'object' && err.message 
+        ? err.message 
+        : 'Failed to calculate custom tax');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [currentUser]);
+
+  // Include in the context value
+  return (
+    <TaxContext.Provider
+      value={{
+        taxCalculation,
+        provisionalTax,
+        taxBrackets,
+        loading,
+        error,
+        currentTaxYear,
+        fetchTaxCalculation,
+        fetchProvisionalTax,
+        fetchTaxBrackets,
+        calculateCustomTax: calculateCustomTaxCalculation,
+        changeTaxYear
+      }}
+    >
+      {children}
+    </TaxContext.Provider>
+  );
 };
-
-// Include in the context value
-return (
-  <TaxContext.Provider
-    value={{
-      taxCalculation,
-      provisionalTax,
-      taxBrackets,
-      loading,
-      error,
-      currentTaxYear,
-      fetchTaxCalculation,
-      fetchProvisionalTax,
-      fetchTaxBrackets,
-      calculateCustomTax: calculateCustomTaxCalculation,
-      changeTaxYear
-    }}
-  >
-    {children}
-  </TaxContext.Provider>
-)};
