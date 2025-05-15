@@ -22,10 +22,11 @@ const Dashboard = () => {
   const error = incomesError || expensesError || taxError;
   
   useEffect(() => {
-    fetchIncomes();
-    fetchExpenses();
-    fetchTaxCalculation();
-  }, []);
+    // Only fetch if data isn't already loaded or being loaded
+    if (!incomesLoading && !incomes.length) fetchIncomes();
+    if (!expensesLoading && !expenses.length) fetchExpenses();
+    if (!taxLoading && !taxCalculation) fetchTaxCalculation();
+  }, [incomesLoading, incomes.length, expensesLoading, expenses.length, taxLoading, taxCalculation, fetchIncomes, fetchExpenses, fetchTaxCalculation]);
   
   // Format currency values
   const formatCurrency = (value) => {

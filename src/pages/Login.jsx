@@ -40,7 +40,7 @@ const Login = () => {
             Sign in to Second Certainty
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Your South African tax management solution
+            Your income tax management solution
           </p>
         </div>
         

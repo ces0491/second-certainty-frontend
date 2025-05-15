@@ -14,11 +14,9 @@ export const IncomeProvider = ({ children }) => {
 
   // Use useCallback for fetchIncomes to prevent infinite loops
   const fetchIncomes = useCallback(async () => {
-    if (!currentUser) return;
+    if (!currentUser || loading) return; // Skip if already loading or no user
     
     setLoading(true);
-    setError(null);
-    
     try {
       const data = await getIncomes(currentUser.id, currentTaxYear);
       setIncomes(data);
@@ -28,7 +26,7 @@ export const IncomeProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser, currentTaxYear]); // Include all dependencies
+  }, [currentUser, currentTaxYear, loading]);
 
   // Effect to fetch incomes when user or tax year changes
   useEffect(() => {
