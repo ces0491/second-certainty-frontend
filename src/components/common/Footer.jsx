@@ -9,7 +9,7 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="text-gray-600 text-sm">
-            &copy; {currentYear} Second Certainty. All rights reserved.
+            &copy; {currentYear} Second Certainty. FSE Class Project.
           </div>
           <div className="mt-2 md:mt-0">
             <p className="text-gray-600 text-sm">

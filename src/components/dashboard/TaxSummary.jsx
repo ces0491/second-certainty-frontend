@@ -25,7 +25,7 @@ const Dashboard = () => {
     fetchIncomes();
     fetchExpenses();
     fetchTaxCalculation();
-  }, [fetchIncomes, fetchExpenses, fetchTaxCalculation]);
+  }, []);
   
   // Format currency values
   const formatCurrency = (value) => {
