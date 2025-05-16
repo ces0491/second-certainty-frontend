@@ -33,8 +33,8 @@ const Sidebar = () => {
                 className={({ isActive }) => 
                   `flex items-center p-2 rounded-lg ${
                     isActive 
-                      ? 'bg-sc-green-100 text-sc-green-700' 
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-sc-green/10 text-sc-green font-medium' 
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-sc-green transition-colors'
                   }`
                 }
               >
