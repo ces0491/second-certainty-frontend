@@ -15,7 +15,8 @@ export const ExpenseProvider = ({ children }) => {
 
   // Use useCallback for fetchExpenses to prevent infinite loops
   const fetchExpenses = useCallback(async () => {
-    if (!currentUser || loading) return; // Skip if already loading or no user
+    if (!currentUser) return;
+    if (loading) return; // Still check loading, but don't depend on it
     
     setLoading(true);
     try {
@@ -27,7 +28,7 @@ export const ExpenseProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser, currentTaxYear, loading]);
+  }, [currentUser, currentTaxYear]);
 
   // Use useCallback for fetchExpenseTypes too
   const fetchExpenseTypes = useCallback(async () => {

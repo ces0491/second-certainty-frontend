@@ -16,7 +16,8 @@ export const TaxProvider = ({ children }) => {
 
   // Use useCallback for tax calculation functions
   const fetchTaxCalculation = useCallback(async () => {
-    if (!currentUser || loading) return; // Skip if already loading or no user
+    if (!currentUser) return;
+    if (loading) return; // Still check loading, but don't depend on it
     
     setLoading(true);
     try {
@@ -28,7 +29,7 @@ export const TaxProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser, currentTaxYear, loading]);
+  }, [currentUser, currentTaxYear]);
 
   const fetchProvisionalTax = useCallback(async () => {
     if (!currentUser || !currentUser.is_provisional_taxpayer) return;
