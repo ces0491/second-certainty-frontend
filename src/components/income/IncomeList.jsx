@@ -3,7 +3,6 @@ import React, { useState } from 'react';  // Remove useEffect if not needed
 import { useIncome } from '../../hooks/useIncome';
 import Loading from '../common/Loading';
 import Alert from '../common/Alert';
-import TaxYearDropdown from '../common/TaxYearDropdown';
 
 // Keep the income source types (this could be fetched from API later)
 const INCOME_SOURCE_TYPES = [

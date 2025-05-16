@@ -30,7 +30,7 @@ export const login = async (email, password) => {
   try {
     // Convert to form data format as required by FastAPI's OAuth2PasswordRequestForm
     const formData = new FormData();
-    formData.append('username', email); // FastAPI expects 'username' not 'email'
+    formData.append('username', email);
     formData.append('password', password);
 
     const response = await api.post('/auth/token', formData, {
@@ -41,11 +41,13 @@ export const login = async (email, password) => {
 
     // Store token in localStorage
     if (response.data.access_token) {
+      console.log("Received token, storing in localStorage");
       localStorage.setItem('auth_token', response.data.access_token);
     }
 
     return response.data;
   } catch (error) {
+    console.error("Login error:", error);
     throw error.response ? error.response.data : new Error('Login failed');
   }
 };
