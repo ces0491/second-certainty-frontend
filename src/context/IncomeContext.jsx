@@ -27,7 +27,7 @@ export const IncomeProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser, currentTaxYear]);
+  }, [currentUser, currentTaxYear, loading]);
 
   // Effect to fetch incomes when user or tax year changes
   useEffect(() => {

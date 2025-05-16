@@ -1,7 +1,6 @@
 // src/components/income/IncomeList.jsx
 import React, { useState } from 'react';  // Remove useEffect if not needed
 import { useIncome } from '../../hooks/useIncome';
-import { useAuth } from '../../hooks/useAuth';
 import Loading from '../common/Loading';
 import Alert from '../common/Alert';
 
@@ -17,8 +16,6 @@ const INCOME_SOURCE_TYPES = [
 ];
 
 const IncomeManagement = () => {
-  // Use currentUser if needed, or remove it
-  const { /* currentUser, */ } = useAuth();  // Comment out or remove if not used
   const { 
     incomes, 
     loading, 

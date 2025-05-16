@@ -1,13 +1,10 @@
 // src/components/tax/TaxCalculation.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTaxCalc } from '../../hooks/useTaxCalc';
-import { useAuth } from '../../hooks/useAuth';
 import Loading from '../common/Loading';
 import Alert from '../common/Alert';
 
 const TaxCalculator = () => {
-  // Don't destructure currentUser and taxBrackets since they're not used
-  const { } = useAuth();
   const { calculateCustomTax } = useTaxCalc();
   
   // Tax calculation inputs

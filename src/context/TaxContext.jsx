@@ -29,7 +29,7 @@ export const TaxProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser, currentTaxYear]);
+  }, [currentUser, currentTaxYear, loading]);
 
   const fetchProvisionalTax = useCallback(async () => {
     if (!currentUser || !currentUser.is_provisional_taxpayer) return;

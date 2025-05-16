@@ -28,7 +28,7 @@ export const ExpenseProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser, currentTaxYear]);
+  }, [currentUser, currentTaxYear, loading]);
 
   // Use useCallback for fetchExpenseTypes too
   const fetchExpenseTypes = useCallback(async () => {

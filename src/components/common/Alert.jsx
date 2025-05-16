@@ -4,9 +4,9 @@ import React from 'react';
 const Alert = ({ type, message, onDismiss }) => {
   const types = {
     success: {
-      bgColor: 'bg-green-100',
-      borderColor: 'border-green-500',
-      textColor: 'text-green-700',
+      bgColor: 'bg-sc-green/10',
+      borderColor: 'border-sc-green',
+      textColor: 'text-sc-green',
     },
     error: {
       bgColor: 'bg-red-100',
@@ -14,9 +14,9 @@ const Alert = ({ type, message, onDismiss }) => {
       textColor: 'text-red-700',
     },
     warning: {
-      bgColor: 'bg-yellow-100',
-      borderColor: 'border-yellow-500',
-      textColor: 'text-yellow-700',
+      bgColor: 'bg-sc-gold/10',
+      borderColor: 'border-sc-gold',
+      textColor: 'text-sc-black',
     },
     info: {
       bgColor: 'bg-blue-100',

@@ -23,10 +23,20 @@ const Dashboard = () => {
   
   useEffect(() => {
     // Only fetch if data isn't already loaded or being loaded
-    if (!incomesLoading && !incomes.length) fetchIncomes();
-    if (!expensesLoading && !expenses.length) fetchExpenses();
-    if (!taxLoading && !taxCalculation) fetchTaxCalculation();
-  }, []);
+    if (!incomesLoading && incomes.length === 0) {
+      fetchIncomes();
+    }
+    if (!expensesLoading && expenses.length === 0) {
+      fetchExpenses();
+    }
+    if (!taxLoading && !taxCalculation) {
+      fetchTaxCalculation();
+    }
+  }, [
+    incomesLoading, incomes.length, fetchIncomes, 
+    expensesLoading, expenses.length, fetchExpenses, 
+    taxLoading, taxCalculation, fetchTaxCalculation
+  ]);
   
   // Format currency values
   const formatCurrency = (value) => {
