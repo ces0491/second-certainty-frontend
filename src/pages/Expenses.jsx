@@ -112,7 +112,7 @@ const Expenses = () => {
         <h1 className="text-2xl font-bold text-gray-800">Expense Management</h1>
         <div className="flex items-center space-x-4">
           <select
-            className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="rounded-md border-gray-300 shadow-sm focus:border-sc-green-300 focus:ring focus:ring-sc-green-200 focus:ring-opacity-50"
             value={currentTaxYear}
             onChange={handleTaxYearChange}
           >
@@ -121,7 +121,7 @@ const Expenses = () => {
             ))}
           </select>
           <button
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="bg-sc-green-600 hover:bg-sc-green-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sc-green-500"
             onClick={() => setIsAddingExpense(!isAddingExpense)}
           >
             {isAddingExpense ? 'Cancel' : 'Add Expense'}
@@ -145,7 +145,7 @@ const Expenses = () => {
               <select
                 id="expense_type_id"
                 name="expense_type_id"
-                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                 value={newExpense.expense_type_id}
                 onChange={handleInputChange}
               >
@@ -164,7 +164,7 @@ const Expenses = () => {
                 type="number"
                 id="amount"
                 name="amount"
-                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                 placeholder="Amount"
                 value={newExpense.amount}
                 onChange={handleInputChange}
@@ -180,7 +180,7 @@ const Expenses = () => {
                 type="text"
                 id="description"
                 name="description"
-                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                 placeholder="e.g. Annual retirement contribution, medical expenses"
                 value={newExpense.description}
                 onChange={handleInputChange}
@@ -190,7 +190,7 @@ const Expenses = () => {
             <div className="md:col-span-2 flex justify-end">
               <button
                 onClick={handleAddExpense}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="bg-sc-green-600 hover:bg-sc-green-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sc-green-500"
                 disabled={loading}
               >
                 {loading ? 'Adding...' : 'Add Expense'}
@@ -201,7 +201,7 @@ const Expenses = () => {
       )}
       
       {/* Expense Summary Card */}
-      <div className="bg-indigo-50 rounded-lg shadow p-6 mb-6">
+      <div className="bg-sc-green-50 rounded-lg shadow p-6 mb-6">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center">
           <div>
             <h2 className="text-xl font-medium text-gray-800">Expense Summary</h2>
@@ -209,7 +209,7 @@ const Expenses = () => {
           </div>
           <div className="mt-4 md:mt-0">
             <p className="text-sm text-gray-600">Total Expenses</p>
-            <p className="text-3xl font-bold text-indigo-600">{formatCurrency(totalExpenses)}</p>
+            <p className="text-3xl font-bold text-sc-green-600">{formatCurrency(totalExpenses)}</p>
           </div>
         </div>
       </div>

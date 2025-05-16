@@ -53,9 +53,9 @@ const TaxBrackets = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-      <div className="px-6 py-4 bg-indigo-600">
+      <div className="px-6 py-4 bg-sc-green-600">
         <h2 className="text-xl font-bold text-white">South African Tax Brackets</h2>
-        <p className="text-indigo-200 mt-1">Income tax rates for individuals</p>
+        <p className="text-sc-green-200 mt-1">Income tax rates for individuals</p>
       </div>
       
       <div className="px-6 py-4 border-b border-gray-200">
@@ -66,7 +66,7 @@ const TaxBrackets = () => {
           <select
             id="taxYear"
             name="taxYear"
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm rounded-md"
             value={selectedYear}
             onChange={handleYearChange}
           >

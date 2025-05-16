@@ -11,7 +11,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-indigo-600 shadow-md">
+    <nav className="bg-sc-green-600 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
@@ -27,12 +27,12 @@ const Navbar = () => {
               <div className="hidden md:ml-4 md:flex md:items-center">
                 <div className="relative">
                   <button
-                    className="max-w-xs bg-indigo-600 rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="max-w-xs bg-sc-green-600 rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sc-green-500"
                     id="user-menu"
                     aria-haspopup="true"
                   >
                     <span className="sr-only">Open user menu</span>
-                    <span className="h-8 w-8 rounded-full bg-indigo-800 flex items-center justify-center text-white">
+                    <span className="h-8 w-8 rounded-full bg-sc-green-800 flex items-center justify-center text-white">
                       {currentUser.name[0]}
                     </span>
                     <span className="ml-2 text-white">
@@ -42,7 +42,7 @@ const Navbar = () => {
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="ml-4 px-3 py-1 rounded-md text-sm font-medium text-white bg-indigo-700 hover:bg-indigo-800"
+                  className="ml-4 px-3 py-1 rounded-md text-sm font-medium text-white bg-sc-green-700 hover:bg-sc-green-800"
                 >
                   Log out
                 </button>

@@ -92,8 +92,8 @@ const Dashboard = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Tax Dashboard</h1>
-        <div className="bg-indigo-100 rounded-lg p-2">
-          <span className="text-sm text-indigo-800 font-medium">Welcome, {currentUser?.name}</span>
+        <div className="bg-sc-green-100 rounded-lg p-2">
+          <span className="text-sm text-sc-green-800 font-medium">Welcome, {currentUser?.name}</span>
         </div>
       </div>
       

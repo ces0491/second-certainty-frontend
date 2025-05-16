@@ -78,10 +78,10 @@ const Profile = () => {
       {successMessage && <Alert type="success" message={successMessage} onDismiss={() => setSuccessMessage('')} />}
       
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="px-6 py-4 bg-indigo-600 flex justify-between items-center">
+        <div className="px-6 py-4 bg-sc-green-600 flex justify-between items-center">
           <h2 className="text-xl font-bold text-white">Profile Information</h2>
           <button
-            className="bg-white text-indigo-600 px-4 py-2 rounded-md font-medium hover:bg-indigo-50"
+            className="bg-white text-sc-green-600 px-4 py-2 rounded-md font-medium hover:bg-sc-green-50"
             onClick={() => setIsEditing(!isEditing)}
           >
             {isEditing ? 'Cancel' : 'Edit Profile'}
@@ -100,7 +100,7 @@ const Profile = () => {
                     type="text"
                     id="name"
                     name="name"
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                     value={formData.name}
                     onChange={handleChange}
                     required
@@ -115,7 +115,7 @@ const Profile = () => {
                     type="text"
                     id="surname"
                     name="surname"
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                     value={formData.surname}
                     onChange={handleChange}
                     required
@@ -130,7 +130,7 @@ const Profile = () => {
                     type="email"
                     id="email"
                     name="email"
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                     value={formData.email}
                     onChange={handleChange}
                     required
@@ -147,7 +147,7 @@ const Profile = () => {
                     type="date"
                     id="date_of_birth"
                     name="date_of_birth"
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                     value={formData.date_of_birth}
                     onChange={handleChange}
                     required
@@ -160,7 +160,7 @@ const Profile = () => {
                       id="is_provisional_taxpayer"
                       name="is_provisional_taxpayer"
                       type="checkbox"
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-sc-green-600 focus:ring-sc-green-500 border-gray-300 rounded"
                       checked={formData.is_provisional_taxpayer}
                       onChange={handleChange}
                     />
@@ -173,7 +173,7 @@ const Profile = () => {
                 <div className="md:col-span-2 flex justify-end">
                   <button
                     type="submit"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="bg-sc-green-600 hover:bg-sc-green-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sc-green-500"
                   >
                     Save Changes
                   </button>
@@ -216,7 +216,7 @@ const Profile = () => {
       </div>
       
       <div className="mt-8 bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="px-6 py-4 bg-indigo-600">
+        <div className="px-6 py-4 bg-sc-green-600">
           <h2 className="text-xl font-bold text-white">Account Security</h2>
         </div>
         
@@ -227,7 +227,7 @@ const Profile = () => {
           </p>
           
           <button
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="bg-sc-green-600 hover:bg-sc-green-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sc-green-500"
             onClick={() => alert('Password change functionality would be implemented here')}
           >
             Change Password

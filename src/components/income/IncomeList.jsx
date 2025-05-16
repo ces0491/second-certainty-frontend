@@ -136,7 +136,7 @@ const IncomeManagement = () => {
         <h1 className="text-2xl font-bold text-gray-800">Income Management</h1>
         <div className="flex items-center space-x-4">
           <select
-            className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="rounded-md border-gray-300 shadow-sm focus:border-sc-green-300 focus:ring focus:ring-sc-green-200 focus:ring-opacity-50"
             value={currentTaxYear}
             onChange={handleTaxYearChange}
           >
@@ -145,7 +145,7 @@ const IncomeManagement = () => {
             ))}
           </select>
           <button
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="bg-sc-green-600 hover:bg-sc-green-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sc-green-500"
             onClick={() => setIsAddingIncome(!isAddingIncome)}
           >
             {isAddingIncome ? 'Cancel' : 'Add Income Source'}
@@ -169,7 +169,7 @@ const IncomeManagement = () => {
               <select
                 id="source_type"
                 name="source_type"
-                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                 value={newIncome.source_type}
                 onChange={handleInputChange}
               >
@@ -188,7 +188,7 @@ const IncomeManagement = () => {
                 type="number"
                 id="annual_amount"
                 name="annual_amount"
-                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                 placeholder="Annual amount"
                 value={newIncome.annual_amount}
                 onChange={handleInputChange}
@@ -204,7 +204,7 @@ const IncomeManagement = () => {
                 type="text"
                 id="description"
                 name="description"
-                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                 placeholder="e.g. Main employment, rental property"
                 value={newIncome.description}
                 onChange={handleInputChange}
@@ -218,7 +218,7 @@ const IncomeManagement = () => {
               <select
                 id="tax_year"
                 name="tax_year"
-                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                 value={newIncome.tax_year}
                 onChange={handleInputChange}
               >
@@ -233,7 +233,7 @@ const IncomeManagement = () => {
                 id="is_paye"
                 name="is_paye"
                 type="checkbox"
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                className="h-4 w-4 text-sc-green-600 focus:ring-sc-green-500 border-gray-300 rounded"
                 checked={newIncome.is_paye}
                 onChange={handleInputChange}
               />
@@ -245,7 +245,7 @@ const IncomeManagement = () => {
             <div className="flex items-center justify-end h-full mt-6">
               <button
                 onClick={handleAddIncome}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="bg-sc-green-600 hover:bg-sc-green-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sc-green-500"
                 disabled={loading}
               >
                 {loading ? 'Adding...' : 'Add Income Source'}
@@ -256,7 +256,7 @@ const IncomeManagement = () => {
       )}
       
       {/* Income Summary Card */}
-      <div className="bg-indigo-50 rounded-lg shadow p-6 mb-6">
+      <div className="bg-sc-green-50 rounded-lg shadow p-6 mb-6">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center">
           <div>
             <h2 className="text-xl font-medium text-gray-800">Income Summary</h2>
@@ -264,7 +264,7 @@ const IncomeManagement = () => {
           </div>
           <div className="mt-4 md:mt-0">
             <p className="text-sm text-gray-600">Total Annual Income</p>
-            <p className="text-3xl font-bold text-indigo-600">{formatCurrency(totalIncome)}</p>
+            <p className="text-3xl font-bold text-sc-green-600">{formatCurrency(totalIncome)}</p>
           </div>
         </div>
       </div>

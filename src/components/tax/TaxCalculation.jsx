@@ -112,9 +112,9 @@ const TaxCalculator = () => {
         {/* Inputs Panel */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="px-6 py-4 bg-indigo-600">
+            <div className="px-6 py-4 bg-sc-green-600">
               <h2 className="text-xl font-bold text-white">Tax Inputs</h2>
-              <p className="text-indigo-200 text-sm">Enter your financial details</p>
+              <p className="text-sc-green-200 text-sm">Enter your financial details</p>
             </div>
             
             <div className="p-6 space-y-6">
@@ -125,7 +125,7 @@ const TaxCalculator = () => {
                 </label>
                 <select
                   id="taxYear"
-                  className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                   value={taxYear}
                   onChange={(e) => setTaxYear(e.target.value)}
                 >
@@ -143,7 +143,7 @@ const TaxCalculator = () => {
                 <input
                   type="number"
                   id="income"
-                  className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                   value={income}
                   onChange={handleIncomeChange}
                   min="0"
@@ -158,7 +158,7 @@ const TaxCalculator = () => {
                 <input
                   type="number"
                   id="age"
-                  className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                   value={age}
                   onChange={handleAgeChange}
                   min="0"
@@ -178,7 +178,7 @@ const TaxCalculator = () => {
                   <input
                     type="number"
                     id="retirement"
-                    className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                     value={expenses.retirement}
                     onChange={(e) => handleExpenseChange('retirement', e)}
                     min="0"
@@ -196,7 +196,7 @@ const TaxCalculator = () => {
                   <input
                     type="number"
                     id="medical"
-                    className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                     value={expenses.medical}
                     onChange={(e) => handleExpenseChange('medical', e)}
                     min="0"
@@ -211,7 +211,7 @@ const TaxCalculator = () => {
                   <input
                     type="number"
                     id="donations"
-                    className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                     value={expenses.donations}
                     onChange={(e) => handleExpenseChange('donations', e)}
                     min="0"
@@ -229,7 +229,7 @@ const TaxCalculator = () => {
                   <input
                     type="number"
                     id="homeOffice"
-                    className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                     value={expenses.homeOffice}
                     onChange={(e) => handleExpenseChange('homeOffice', e)}
                     min="0"
@@ -244,7 +244,7 @@ const TaxCalculator = () => {
                   <input
                     type="number"
                     id="travel"
-                    className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 sm:text-sm"
                     value={expenses.travel}
                     onChange={(e) => handleExpenseChange('travel', e)}
                     min="0"
@@ -258,9 +258,9 @@ const TaxCalculator = () => {
         {/* Results Panel */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="px-6 py-4 bg-indigo-600">
+            <div className="px-6 py-4 bg-sc-green-600">
               <h2 className="text-xl font-bold text-white">Tax Calculation Results</h2>
-              <p className="text-indigo-200 text-sm">
+              <p className="text-sc-green-200 text-sm">
                 {loading ? 'Calculating...' : 'Based on the information provided'}
               </p>
             </div>
@@ -274,23 +274,23 @@ const TaxCalculator = () => {
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   {/* Final Tax Card */}
-                  <div className="bg-indigo-50 rounded-lg p-4">
+                  <div className="bg-sc-green-50 rounded-lg p-4">
                     <h3 className="text-sm font-medium text-gray-500">Final Tax Payable</h3>
-                    <p className="text-2xl font-bold text-indigo-600">{formatCurrency(calculationResult.final_tax)}</p>
+                    <p className="text-2xl font-bold text-sc-green-600">{formatCurrency(calculationResult.final_tax)}</p>
                     <p className="text-xs text-gray-500">Annual</p>
                   </div>
                   
                   {/* Monthly Tax Card */}
-                  <div className="bg-indigo-50 rounded-lg p-4">
+                  <div className="bg-sc-green-50 rounded-lg p-4">
                     <h3 className="text-sm font-medium text-gray-500">Monthly Tax</h3>
-                    <p className="text-2xl font-bold text-indigo-600">{formatCurrency(calculationResult.final_tax / 12)}</p>
+                    <p className="text-2xl font-bold text-sc-green-600">{formatCurrency(calculationResult.final_tax / 12)}</p>
                     <p className="text-xs text-gray-500">Per month</p>
                   </div>
                   
                   {/* Effective Rate Card */}
-                  <div className="bg-indigo-50 rounded-lg p-4">
+                  <div className="bg-sc-green-50 rounded-lg p-4">
                     <h3 className="text-sm font-medium text-gray-500">Effective Tax Rate</h3>
-                    <p className="text-2xl font-bold text-indigo-600">{formatPercentage(calculationResult.effective_tax_rate)}</p>
+                    <p className="text-2xl font-bold text-sc-green-600">{formatPercentage(calculationResult.effective_tax_rate)}</p>
                     <p className="text-xs text-gray-500">Of taxable income</p>
                   </div>
                 </div>
@@ -357,11 +357,11 @@ const TaxCalculator = () => {
                           {formatCurrency(calculationResult.medical_credits)}
                         </td>
                       </tr>
-                      <tr className="bg-indigo-50">
+                      <tr className="bg-sc-green-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
                           Final Tax Payable
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-600 text-right">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-sc-green-600 text-right">
                           {formatCurrency(calculationResult.final_tax)}
                         </td>
                       </tr>

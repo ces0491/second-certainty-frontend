@@ -46,7 +46,7 @@ const ProvisionalTax = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Provisional Tax</h1>
         <button
-          className="text-indigo-600 hover:text-indigo-800 focus:outline-none"
+          className="text-sc-green-600 hover:text-sc-green-800 focus:outline-none"
           onClick={() => setShowInfo(!showInfo)}
         >
           {showInfo ? 'Hide Info' : 'What is Provisional Tax?'}
@@ -76,7 +76,7 @@ const ProvisionalTax = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* First Payment Card */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="px-6 py-4 bg-indigo-600">
+            <div className="px-6 py-4 bg-sc-green-600">
               <h2 className="text-xl font-bold text-white">First Provisional Payment</h2>
             </div>
             <div className="p-6">
@@ -89,7 +89,7 @@ const ProvisionalTax = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-gray-600">Amount</p>
-                  <p className="text-2xl font-bold text-indigo-600">
+                  <p className="text-2xl font-bold text-sc-green-600">
                     {formatCurrency(provisionalTax.first_payment.amount)}
                   </p>
                 </div>
@@ -110,7 +110,7 @@ const ProvisionalTax = () => {
           
           {/* Second Payment Card */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="px-6 py-4 bg-indigo-600">
+            <div className="px-6 py-4 bg-sc-green-600">
               <h2 className="text-xl font-bold text-white">Second Provisional Payment</h2>
             </div>
             <div className="p-6">
@@ -123,7 +123,7 @@ const ProvisionalTax = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-gray-600">Amount</p>
-                  <p className="text-2xl font-bold text-indigo-600">
+                  <p className="text-2xl font-bold text-sc-green-600">
                     {formatCurrency(provisionalTax.second_payment.amount)}
                   </p>
                 </div>
@@ -144,7 +144,7 @@ const ProvisionalTax = () => {
           
           {/* Tax Summary Card */}
           <div className="md:col-span-2 bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="px-6 py-4 bg-indigo-600">
+            <div className="px-6 py-4 bg-sc-green-600">
               <h2 className="text-xl font-bold text-white">Provisional Tax Summary</h2>
             </div>
             <div className="p-6">

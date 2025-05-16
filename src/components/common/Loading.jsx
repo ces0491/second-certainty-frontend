@@ -14,14 +14,14 @@ const Loading = ({ size = 'md', fullPage = false }) => {
   if (fullPage) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-75 z-50">
-        <div className={`animate-spin rounded-full ${spinnerSize} border-t-2 border-b-2 border-indigo-500`}></div>
+        <div className={`animate-spin rounded-full ${spinnerSize} border-t-2 border-b-2 border-sc-green-500`}></div>
       </div>
     );
   }
 
   return (
     <div className="flex justify-center items-center p-4">
-      <div className={`animate-spin rounded-full ${spinnerSize} border-t-2 border-b-2 border-indigo-500`}></div>
+      <div className={`animate-spin rounded-full ${spinnerSize} border-t-2 border-b-2 border-sc-green-500`}></div>
     </div>
   );
 };

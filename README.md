@@ -2,7 +2,7 @@
 
 This is the frontend application for Second Certainty, a comprehensive South African tax liability management system that helps users track, calculate, and optimize their tax obligations throughout the fiscal year.
 
-![Second Certainty Logo](/sc_logo.png)
+![](/sc_logo.png)
 
 ## Live Demo
 
