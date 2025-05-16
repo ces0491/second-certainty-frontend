@@ -26,7 +26,7 @@ const Dashboard = () => {
     if (!incomesLoading && !incomes.length) fetchIncomes();
     if (!expensesLoading && !expenses.length) fetchExpenses();
     if (!taxLoading && !taxCalculation) fetchTaxCalculation();
-  }, [incomesLoading, incomes.length, expensesLoading, expenses.length, taxLoading, taxCalculation, fetchIncomes, fetchExpenses, fetchTaxCalculation]);
+  }, []);
   
   // Format currency values
   const formatCurrency = (value) => {
