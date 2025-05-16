@@ -1,10 +1,9 @@
-// src/api/index.js - Improve the error handling
+// src/api/index.js
 import axios from 'axios';
 
-// Use the correct API URL
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://second-certainty-api.onrender.com/api';
+// Use the correct API URL - check this matches your backend
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:10000/api';
 
-// Create axios instance with retry logic
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -14,44 +13,46 @@ const api = axios.create({
   timeout: 15000,
 });
 
-// Add retry logic for Render's free tier which often needs "wake up" time
-api.interceptors.response.use(
-  response => response,
-  async error => {
-    const { config, response } = error;
-    
-    // Only retry GET requests that failed with 5xx errors (server errors)
-    if (config && response && response.status >= 500 && config.method === 'get' && !config._retry) {
-      config._retry = true;
-      console.log('Server error, retrying request after 2 seconds...');
-      
-      // Wait 2 seconds before retrying (Render free tier often needs warm-up time)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      return api(config);
+// Request interceptor for adding auth token
+api.interceptors.request.use(
+  (config) => {
+    // Don't add auth header to token endpoint - can cause CORS issues
+    if (config.url.includes('/auth/token')) {
+      console.log('Skipping auth header for token endpoint');
+      return config;
     }
     
-    // Add specific error handling for database errors
-    if (response && response.data && response.data.detail && response.data.detail.includes('database')) {
-      console.error('Database connection error. The server might be starting up.');
-      
-      // You could add UI notification here for database errors
-      error.isConnectionError = true;
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      console.log('Adding token to request:', config.url);
+      config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.log('No token available for request:', config.url);
     }
-    
+    return config;
+  },
+  (error) => {
+    console.error('Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
 
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      console.log(`Adding token to request: ${token.substring(0, 15)}...`);
-      config.headers.Authorization = `Bearer ${token}`;
+// Response interceptor for handling token expiration
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      console.log('Unauthorized response, clearing token');
+      localStorage.removeItem('auth_token');
+      
+      // Only redirect to login if we're not already on the login page
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
     }
-    return config;
-  },
-  (error) => Promise.reject(error)
+    
+    return Promise.reject(error);
+  }
 );
 
 export default api;

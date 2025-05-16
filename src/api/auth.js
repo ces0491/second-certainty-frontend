@@ -1,81 +1,55 @@
+// src/api/auth.js
 import api from './index';
 
-/**
- * User registration 
- * @param {Object} userData - User registration data
- * @param {string} userData.email - User email
- * @param {string} userData.password - User password
- * @param {string} userData.name - User's first name
- * @param {string} userData.surname - User's last name
- * @param {string} userData.date_of_birth - User's date of birth (YYYY-MM-DD)
- * @param {boolean} [userData.is_provisional_taxpayer] - Whether user is a provisional taxpayer
- * @returns {Promise} - API response promise
- */
-export const register = async (userData) => {
-  try {
-    const response = await api.post('/auth/register', userData);
-    return response.data;
-  } catch (error) {
-    throw error.response ? error.response.data : new Error('Registration failed');
-  }
-};
-
-/**
- * User login
- * @param {string} email - User email
- * @param {string} password - User password
- * @returns {Promise} - API response promise with access token
- */
 export const login = async (email, password) => {
   try {
-    // Convert to form data format as required by FastAPI's OAuth2PasswordRequestForm
+    console.log('Login attempt for:', email);
+    
+    // Create FormData for FastAPI's OAuth2PasswordRequestForm
     const formData = new FormData();
-    formData.append('username', email);
+    formData.append('username', email); // FastAPI expects 'username' not 'email'
     formData.append('password', password);
 
+    // Clear any existing tokens
+    localStorage.removeItem('auth_token');
+    
     const response = await api.post('/auth/token', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
 
+    console.log('Login response:', response.data);
+
     // Store token in localStorage
     if (response.data.access_token) {
-      console.log("Received token, storing in localStorage");
       localStorage.setItem('auth_token', response.data.access_token);
+      console.log('Token stored in localStorage');
+    } else {
+      console.error('No access token in response');
+      throw new Error('No access token received');
     }
 
     return response.data;
   } catch (error) {
-    console.error("Login error:", error);
-    throw error.response ? error.response.data : new Error('Login failed');
+    console.error('Login error:', error);
+    
+    // Better error handling
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.error('Error data:', error.response.data);
+      console.error('Error status:', error.response.status);
+      
+      throw error.response.data;
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('No response received:', error.request);
+      throw new Error('No response from server');
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error('Request error:', error.message);
+      throw error;
+    }
   }
-};
-
-/**
- * Get current user profile
- * @returns {Promise} - API response promise with user data
- */
-export const getCurrentUser = async () => {
-  try {
-    const response = await api.get('/auth/me');
-    return response.data;
-  } catch (error) {
-    throw error.response ? error.response.data : new Error('Failed to fetch user profile');
-  }
-};
-
-/**
- * Logout user by removing token
- */
-export const logout = () => {
-  localStorage.removeItem('auth_token');
-};
-
-/**
- * Check if user is authenticated
- * @returns {boolean} - Authentication status
- */
-export const isAuthenticated = () => {
-  return !!localStorage.getItem('auth_token');
 };

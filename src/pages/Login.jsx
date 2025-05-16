@@ -23,15 +23,18 @@ const Login = () => {
     }
 
     try {
+      console.log('Submitting login form for:', email);
       const result = await login(email, password);
+      
       if (result.success) {
+        console.log('Login successful, navigating to dashboard');
         navigate('/dashboard');
       } else {
         setFormError(result.error || 'Login failed. Please check your credentials.');
       }
     } catch (err) {
-      setFormError('An unexpected error occurred. Please try again later.');
-      console.error('Login error:', err);
+      console.error('Login error in component:', err);
+      setFormError(err.detail || err.message || 'An unexpected error occurred. Please try again later.');
     }
   };
 
