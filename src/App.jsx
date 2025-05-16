@@ -12,13 +12,13 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <IncomeProvider>
-          <ExpenseProvider>
-            <TaxProvider>
+        <TaxProvider>
+          <IncomeProvider>
+            <ExpenseProvider>
               <AppRoutes />
-            </TaxProvider>
-          </ExpenseProvider>
-        </IncomeProvider>
+            </ExpenseProvider>
+          </IncomeProvider>
+        </TaxProvider>
       </AuthProvider>
     </Router>
   );

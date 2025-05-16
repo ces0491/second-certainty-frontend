@@ -1,10 +1,14 @@
 // src/api/auth.js
 import api from './index';
 
+/**
+ * Login user with email and password
+ * @param {string} email - User email
+ * @param {string} password - User password
+ * @returns {Promise} - API response promise with token
+ */
 export const login = async (email, password) => {
   try {
-    console.log('Login attempt for:', email);
-    
     // Create FormData for FastAPI's OAuth2PasswordRequestForm
     const formData = new FormData();
     formData.append('username', email); // FastAPI expects 'username' not 'email'
@@ -19,37 +23,63 @@ export const login = async (email, password) => {
       },
     });
 
-    console.log('Login response:', response.data);
-
     // Store token in localStorage
     if (response.data.access_token) {
       localStorage.setItem('auth_token', response.data.access_token);
-      console.log('Token stored in localStorage');
     } else {
-      console.error('No access token in response');
       throw new Error('No access token received');
     }
 
     return response.data;
   } catch (error) {
-    console.error('Login error:', error);
-    
-    // Better error handling
     if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      console.error('Error data:', error.response.data);
-      console.error('Error status:', error.response.status);
-      
       throw error.response.data;
     } else if (error.request) {
-      // The request was made but no response was received
-      console.error('No response received:', error.request);
       throw new Error('No response from server');
     } else {
-      // Something happened in setting up the request that triggered an Error
-      console.error('Request error:', error.message);
       throw error;
     }
   }
+};
+
+/**
+ * Register a new user
+ * @param {Object} userData - User registration data
+ * @returns {Promise} - API response promise
+ */
+export const register = async (userData) => {
+  try {
+    const response = await api.post('/auth/register', userData);
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Registration failed');
+  }
+};
+
+/**
+ * Get current user data
+ * @returns {Promise} - API response promise with user data
+ */
+export const getCurrentUser = async () => {
+  try {
+    const response = await api.get('/auth/me');
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Failed to get user data');
+  }
+};
+
+/**
+ * Logout user by removing auth token
+ */
+export const logout = () => {
+  localStorage.removeItem('auth_token');
+};
+
+/**
+ * Check if user is authenticated
+ * @returns {boolean} - Authentication status
+ */
+export const isAuthenticated = () => {
+  return !!localStorage.getItem('auth_token');
 };

@@ -37,19 +37,18 @@ export const calculateEffectiveTaxRate = (taxAmount, taxableIncome) => {
 };
 
 /**
- * Format percentage
- * @param {number} value - Value to format
- * @param {number} [decimals=2] - Number of decimal places
- * @returns {string} - Formatted percentage
+ * Calculate monthly tax from annual amount
+ * @param {number} annualTax - Annual tax amount
+ * @returns {number} - Monthly tax amount
  */
-export const formatPercentage = (value, decimals = 2) => {
-  return `${(value * 100).toFixed(decimals)}%`;
+export const calculateMonthlyTax = (annualTax) => {
+  return annualTax / 12;
 };
 
 /**
- * Calculate provisional tax
+ * Calculate provisional tax payments
  * @param {number} taxAmount - Annual tax amount
- * @returns {Object} - Provisional tax amounts and dates
+ * @returns {Object} - Provisional tax payments data
  */
 export const calculateProvisionalPayments = (taxAmount) => {
   if (!taxAmount) return { first: 0, second: 0 };
@@ -57,14 +56,17 @@ export const calculateProvisionalPayments = (taxAmount) => {
   const firstPayment = taxAmount * 0.5;
   const secondPayment = taxAmount * 0.5;
   
+  // Get tax year dates
+  const currentYear = new Date().getFullYear();
+  
   return {
     first: {
       amount: firstPayment,
-      dueDate: '2024-08-31'
+      dueDate: `${currentYear}-08-31`
     },
     second: {
       amount: secondPayment,
-      dueDate: '2025-02-28'
+      dueDate: `${currentYear + 1}-02-28`
     }
   };
 };

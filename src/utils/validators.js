@@ -15,7 +15,7 @@ export const isValidEmail = (email) => {
  * @returns {boolean} - Validation result
  */
 export const isRequired = (value) => {
-  return value !== null && value !== undefined && value.trim() !== '';
+  return value !== null && value !== undefined && value.toString().trim() !== '';
 };
 
 /**
@@ -30,11 +30,20 @@ export const minLength = (value, minLength) => {
 
 /**
  * Number validation
- * @param {string} value - Field value
+ * @param {string|number} value - Field value
  * @returns {boolean} - Validation result
  */
 export const isNumber = (value) => {
   return !isNaN(Number(value));
+};
+
+/**
+ * Positive number validation
+ * @param {string|number} value - Field value
+ * @returns {boolean} - Validation result
+ */
+export const isPositiveNumber = (value) => {
+  return isNumber(value) && Number(value) >= 0;
 };
 
 /**
