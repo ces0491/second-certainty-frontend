@@ -3,6 +3,7 @@ import React, { useState } from 'react';  // Remove useEffect if not needed
 import { useIncome } from '../../hooks/useIncome';
 import Loading from '../common/Loading';
 import Alert from '../common/Alert';
+import TaxYearDropdown from '../common/TaxYearDropdown';
 
 // Keep the income source types (this could be fetched from API later)
 const INCOME_SOURCE_TYPES = [
@@ -142,7 +143,7 @@ const IncomeManagement = () => {
             ))}
           </select>
           <button
-            className="bg-sc-green-600 hover:bg-sc-green-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sc-green-500"
+            className="bg-sc-green hover:bg-sc-green/90 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sc-green transition-colors"
             onClick={() => setIsAddingIncome(!isAddingIncome)}
           >
             {isAddingIncome ? 'Cancel' : 'Add Income Source'}
