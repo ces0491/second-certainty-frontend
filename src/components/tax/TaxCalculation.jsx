@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTaxCalc } from '../../hooks/useTaxCalc';
 import Loading from '../common/Loading';
 import Alert from '../common/Alert';
+import { formatCurrency, formatPercentage } from '../../utils/formatters';
 
 const TaxCalculator = () => {
   const { calculateCustomTax } = useTaxCalc();
@@ -62,21 +63,6 @@ const TaxCalculator = () => {
   useEffect(() => {
     calculateTax();
   }, [calculateTax]); // calculateTax includes all necessary dependencies
-  
-  // Format currency
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-ZA', { 
-      style: 'currency', 
-      currency: 'ZAR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0 
-    }).format(value);
-  };
-  
-  // Format percentage
-  const formatPercentage = (value) => {
-    return `${(value * 100).toFixed(2)}%`;
-  };
   
   // Handle input changes
   const handleIncomeChange = (e) => {

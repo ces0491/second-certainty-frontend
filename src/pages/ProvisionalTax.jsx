@@ -4,8 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useTaxCalc } from '../hooks/useTaxCalc';
 import Loading from '../components/common/Loading';
 import Alert from '../components/common/Alert';
-import { formatCurrency } from '../utils/formatCurrency';
-import { formatDate } from '../utils/formatDate';
+import { formatCurrency, formatDate } from '../utils/formatters';
 
 const ProvisionalTax = () => {
   const { currentUser } = useAuth();

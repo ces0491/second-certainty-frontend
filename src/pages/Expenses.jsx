@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useExpenses } from '../hooks/useExpenses';
 import Loading from '../components/common/Loading';
 import Alert from '../components/common/Alert';
-import { formatCurrency } from '../utils/formatCurrency';
+import { formatCurrency } from '../utils/formatters';
 
 const Expenses = () => {
   const { 

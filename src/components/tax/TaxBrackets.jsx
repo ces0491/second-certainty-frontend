@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useTaxCalc } from '../../hooks/useTaxCalc';
 import Loading from '../common/Loading';
 import Alert from '../common/Alert';
+import { formatCurrency, formatPercentage } from '../../utils/formatters';
 
 const TaxBrackets = () => {
   const { taxBrackets, loading, error, fetchTaxBrackets } = useTaxCalc();
@@ -14,23 +15,6 @@ const TaxBrackets = () => {
   useEffect(() => {
     fetchTaxBrackets(selectedYear);
   }, [selectedYear, fetchTaxBrackets]);
-
-  // Format currency values
-  const formatCurrency = (value) => {
-    if (value === null) return 'and above';
-    
-    return new Intl.NumberFormat('en-ZA', { 
-      style: 'currency', 
-      currency: 'ZAR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0 
-    }).format(value);
-  };
-
-  // Format percentage
-  const formatPercentage = (value) => {
-    return `${(value * 100).toFixed(0)}%`;
-  };
 
   // Handle year change
   const handleYearChange = (e) => {

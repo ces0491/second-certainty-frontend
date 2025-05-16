@@ -2,7 +2,6 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import logo from '../public/sc_logo.png';
 
 const Navbar = () => {
   const { currentUser, logout } = useContext(AuthContext);
@@ -18,7 +17,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
               <Link to="/dashboard" className="flex items-center">
-                <img src={logo} alt="Second Certainty Logo" className="h-10 w-auto mr-2" />
+                <img src="/sc_logo.png" alt="Second Certainty Logo" className="h-10 w-auto mr-2" />
                 <span className="text-white text-xl font-bold">Second Certainty</span>
               </Link>
             </div>
