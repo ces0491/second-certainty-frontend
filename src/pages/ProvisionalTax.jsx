@@ -6,6 +6,10 @@ import Loading from '../components/common/Loading';
 import Alert from '../components/common/Alert';
 import { formatCurrency, formatDate } from '../utils/formatters';
 
+const safeNumber = (value) => {
+  return typeof value === 'number' && !isNaN(value) ? value : 0;
+};
+
 const ProvisionalTax = () => {
   const { currentUser } = useAuth();
   const { provisionalTax, loading, error, fetchProvisionalTax } = useTaxCalc();
@@ -89,7 +93,8 @@ const ProvisionalTax = () => {
                 <div className="text-right">
                   <p className="text-sm text-gray-600">Amount</p>
                   <p className="text-2xl font-bold text-sc-green-600">
-                    {formatCurrency(provisionalTax.first_payment.amount)}
+                    {formatCurrency(provisionalTax?.first_payment?.amount ? 
+                      safeNumber(provisionalTax.first_payment.amount) : 0)}
                   </p>
                 </div>
               </div>
@@ -124,6 +129,7 @@ const ProvisionalTax = () => {
                   <p className="text-sm text-gray-600">Amount</p>
                   <p className="text-2xl font-bold text-sc-green-600">
                     {formatCurrency(provisionalTax.second_payment.amount)}
+                      safeNumber(provisionalTax.second_payment.amount) : 0)}
                   </p>
                 </div>
               </div>
@@ -152,18 +158,21 @@ const ProvisionalTax = () => {
                   <p className="text-sm text-gray-600">Total Annual Tax</p>
                   <p className="text-xl font-bold text-gray-800">
                     {formatCurrency(provisionalTax.total_tax)}
+                      safeNumber(provisionalTax.total_tax.amount) : 0)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Taxable Income</p>
                   <p className="text-xl font-bold text-gray-800">
                     {formatCurrency(provisionalTax.taxable_income)}
+                      safeNumber(provisionalTax.taxable_income.amount) : 0)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Effective Tax Rate</p>
                   <p className="text-xl font-bold text-gray-800">
-                    {(provisionalTax.effective_tax_rate * 100).toFixed(2)}%
+                    {provisionalTax?.effective_tax_rate ?
+                      (safeNumber(provisionalTax.effective_tax_rate) * 100).toFixed(2) + '%' : '0.00%'}
                   </p>
                 </div>
               </div>

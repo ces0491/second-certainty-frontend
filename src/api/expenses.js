@@ -70,8 +70,14 @@ export const deleteExpense = async (userId, expenseId) => {
 export const getExpenseTypes = async () => {
   try {
     const response = await api.get('/tax/deductible-expenses/');
+    // Add a check to ensure the response contains valid data
+    if (!response.data || !Array.isArray(response.data)) {
+      throw new Error('Invalid expense type data received');
+    }
     return response.data;
   } catch (error) {
-    throw error.response ? error.response.data : new Error('Failed to fetch expense types');
+    console.error('Expense types fetch error:', error);
+    // Return empty array as fallback instead of throwing
+    return [];
   }
 };

@@ -88,12 +88,12 @@ const TaxBrackets = () => {
                       }
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatPercentage(bracket.rate)}
+                      {formatPercentage(bracket.rate, 0)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {bracket.base_amount > 0 
-                        ? `${formatCurrency(bracket.base_amount)} + ${formatPercentage(bracket.rate)} of amount above ${formatCurrency(bracket.lower_limit - 1)}`
-                        : formatPercentage(bracket.rate)
+                        ? `${formatCurrency(bracket.base_amount)} + ${formatPercentage(bracket.rate, 0)} of amount above ${formatCurrency(bracket.lower_limit - 1)}`
+                        : formatPercentage(bracket.rate, 0)
                       }
                     </td>
                   </tr>

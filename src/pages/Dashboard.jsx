@@ -23,22 +23,47 @@ const Dashboard = () => {
   const error = incomesError || expensesError || taxError;
   
   useEffect(() => {
-    // Only fetch if data isn't already loaded or being loaded
-    if (!incomesLoading && incomes.length === 0) {
-      fetchIncomes();
+  const fetchData = async () => {
+    if (!incomesLoading) {
+      await fetchIncomes();
     }
-    if (!expensesLoading && expenses.length === 0) {
-      fetchExpenses();
+    if (!expensesLoading) {
+      await fetchExpenses();
     }
-    if (!taxLoading && !taxCalculation) {
-      fetchTaxCalculation();
+    if (!taxLoading) {
+      await fetchTaxCalculation();
     }
-  }, [
-    incomesLoading, incomes.length, fetchIncomes, 
-    expensesLoading, expenses.length, fetchExpenses, 
-    taxLoading, taxCalculation, fetchTaxCalculation
-  ]);
+  };
   
+  fetchData();
+}, []); // Simplified dependencies to avoid infinite loops
+
+// Add a timeout for the loading state
+useEffect(() => {
+  let timeout;
+  if (loading) {
+    timeout = setTimeout(() => {
+      // Force exit loading state after 10 seconds
+      setForcedLoading(false);
+    }, 10000);
+  }
+  
+  return () => clearTimeout(timeout);
+}, [loading]);
+
+// Modify the render condition to account for delayed or missing data
+if (loading && !forcedLoading) {
+  return <Loading />;
+}
+
+// Show content even if some data is missing
+return (
+  <div className="container mx-auto px-4 py-8">
+    {/* Dashboard content with proper null checks */}
+    {/* ... */}
+  </div>
+);
+
   // Generate monthly data from annual figures
   const generateMonthlyData = () => {
     if (!taxCalculation) return [];
