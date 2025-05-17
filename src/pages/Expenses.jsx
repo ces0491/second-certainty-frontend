@@ -7,7 +7,6 @@ import Alert from '../components/common/Alert';
 import { formatCurrency } from '../utils/formatters';
 
 const Expenses = () => {
-  const { currentUser } = useAuth();
   const { 
     expenses, 
     expenseTypes, 
@@ -154,6 +153,25 @@ const Expenses = () => {
     changeTaxYear(newYear);
   };
   
+  const getExpenseTypeName = (expense) => {
+    if (expense.expense_type && expense.expense_type.name) {
+        return expense.expense_type.name;
+    }
+    
+    // Try to find expense type from the context
+    const matchingType = expenseTypes.find(
+        type => type.id === expense.expense_type_id
+    );
+    
+    if (matchingType) {
+        return matchingType.name;
+    }
+    
+    return expense.expense_type_id 
+        ? `Type ID: ${expense.expense_type_id}` 
+        : 'Unknown';
+    }
+
   // Debug expenses
   useEffect(() => {
     console.log('Current expenses:', expenses);

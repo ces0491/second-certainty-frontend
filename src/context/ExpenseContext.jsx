@@ -81,6 +81,12 @@ export const ExpenseProvider = ({ children }) => {
     }
   }, [currentUser, currentTaxYear, fetchExpenses]);
 
+  useEffect(() => {
+    if (expenseTypes.length === 0) {
+        fetchExpenseTypes();
+    }
+  }, [expenseTypes.length, fetchExpenseTypes]);
+
   // Improved addExpenseItem function with better error handling
   const addExpenseItem = useCallback(async (expenseData) => {
     setLoading(true);
