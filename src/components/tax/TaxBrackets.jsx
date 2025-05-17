@@ -1,8 +1,8 @@
-// src/components/tax/TaxBrackets.jsx
+// src/components/tax/TaxBrackets.jsx - Fix for tax bracket display
 import React, { useState, useEffect } from 'react';
 import { useTaxCalc } from '../../hooks/useTaxCalc';
-import Loading from '../common/Loading';
-import Alert from '../common/Alert';
+import Loading from '../components/common/Loading';
+import Alert from '../components/common/Alert';
 import { formatCurrency, formatPercentage } from '../../utils/formatters';
 
 const TaxBrackets = () => {
@@ -82,6 +82,7 @@ const TaxBrackets = () => {
                 {taxBrackets.map((bracket, index) => (
                   <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {/* Fixed: Display "and above" for top tax bracket */}
                       {bracket.upper_limit 
                         ? `${formatCurrency(bracket.lower_limit)} - ${formatCurrency(bracket.upper_limit)}`
                         : `${formatCurrency(bracket.lower_limit)} and above`

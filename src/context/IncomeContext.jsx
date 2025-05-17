@@ -14,38 +14,39 @@ export const IncomeProvider = ({ children }) => {
 
   // Use useCallback for fetchIncomes to prevent infinite loops
   const fetchIncomes = useCallback(async () => {
-  if (!currentUser) return;
-  
-  setLoading(true);
-  try {
-    const data = await getIncomes(currentUser.id, currentTaxYear);
-    // Check if data is an array before setting it
-    if (Array.isArray(data)) {
-      setIncomes(data);
-    } else {
-      console.error('Unexpected data format for incomes:', data);
-      setIncomes([]);
+    if (!currentUser) return;
+    if (loading) return; // Still check loading, but don't depend on it
+    
+    setLoading(true);
+    try {
+      console.log('Fetching incomes for user:', currentUser.id, 'tax year:', currentTaxYear);
+      const data = await getIncomes(currentUser.id, currentTaxYear);
+      
+      // Check if data is an array before setting it
+      if (Array.isArray(data)) {
+        console.log('Incomes fetched successfully:', data.length, 'items');
+        setIncomes(data);
+      } else {
+        console.error('Unexpected data format for incomes:', data);
+        setIncomes([]);
+        setError('Received invalid income data from the server');
+      }
+    } catch (err) {
+      console.error('Error fetching incomes:', err);
+      setError(err.message || 'Failed to fetch income data');
+      setIncomes([]); // Set empty array on error to prevent rendering issues
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error('Error fetching incomes:', err);
-    setError(err.message || 'Failed to fetch income data');
-    setIncomes([]); // Set empty array on error to prevent rendering issues
-  } finally {
-    setLoading(false);
-  }
-}, [currentUser, currentTaxYear]);
+  }, [currentUser, currentTaxYear, loading]);
 
   // Effect to fetch incomes when user or tax year changes
-useEffect(() => {
-  // Log component mounting for debugging
-  console.log('Component mounted, current tax year:', currentTaxYear);
-  
-  // Force a refresh of data
-  if (currentUser) {
-    console.log('Fetching data for user:', currentUser.id);
-    fetchIncomes();
-  }
-}, [currentUser, currentTaxYear]);
+  // Fixed ESLint warning by adding fetchIncomes dependency
+  useEffect(() => {
+    if (currentUser) {
+      fetchIncomes();
+    }
+  }, [currentUser, currentTaxYear, fetchIncomes]); 
 
   // Other methods can be converted to useCallback too for consistency
   const addIncomeItem = useCallback(async (incomeData) => {
@@ -53,13 +54,22 @@ useEffect(() => {
     setError(null);
     
     try {
+      console.log('Adding income with data:', {
+        ...incomeData,
+        tax_year: currentTaxYear
+      });
+      
       const newIncome = await addIncome(currentUser.id, {
         ...incomeData,
         tax_year: currentTaxYear
       });
+      
+      console.log('Income added successfully:', newIncome);
+      
       setIncomes([...incomes, newIncome]);
       return { success: true, data: newIncome };
     } catch (err) {
+      console.error('Error adding income:', err);
       setError(err.message || 'Failed to add income');
       return { success: false, error: err.message || 'Failed to add income' };
     } finally {
@@ -72,10 +82,16 @@ useEffect(() => {
     setError(null);
     
     try {
+      console.log('Updating income with ID:', incomeId, 'and data:', incomeData);
+      
       const updatedIncome = await updateIncome(currentUser.id, incomeId, incomeData);
+      
+      console.log('Income updated successfully:', updatedIncome);
+      
       setIncomes(incomes.map(income => income.id === incomeId ? updatedIncome : income));
       return { success: true, data: updatedIncome };
     } catch (err) {
+      console.error('Error updating income:', err);
       setError(err.message || 'Failed to update income');
       return { success: false, error: err.message || 'Failed to update income' };
     } finally {
@@ -88,10 +104,16 @@ useEffect(() => {
     setError(null);
     
     try {
+      console.log('Deleting income with ID:', incomeId);
+      
       await deleteIncome(currentUser.id, incomeId);
+      
+      console.log('Income deleted successfully');
+      
       setIncomes(incomes.filter(income => income.id !== incomeId));
       return { success: true };
     } catch (err) {
+      console.error('Error deleting income:', err);
       setError(err.message || 'Failed to delete income');
       return { success: false, error: err.message || 'Failed to delete income' };
     } finally {
@@ -100,6 +122,7 @@ useEffect(() => {
   }, [currentUser, incomes]);
 
   const changeTaxYear = useCallback((taxYear) => {
+    console.log('Changing tax year to:', taxYear);
     setCurrentTaxYear(taxYear);
   }, []);
 

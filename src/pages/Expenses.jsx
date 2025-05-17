@@ -1,11 +1,13 @@
 // src/pages/Expenses.jsx
 import React, { useState, useEffect } from 'react';
 import { useExpenses } from '../hooks/useExpenses';
+import { useAuth } from '../hooks/useAuth';
 import Loading from '../components/common/Loading';
 import Alert from '../components/common/Alert';
 import { formatCurrency } from '../utils/formatters';
 
 const Expenses = () => {
+  const { currentUser } = useAuth();
   const { 
     expenses, 
     expenseTypes, 
@@ -30,7 +32,7 @@ const Expenses = () => {
   // Available tax years
   const TAX_YEARS = ['2025-2026', '2024-2025', '2023-2024', '2022-2023'];
   
-  // Force refresh data on component mount
+  // Force refresh data on component mount - Fixed ESLint warning by adding expenseTypes to deps
   useEffect(() => {
     console.log('Expenses component mounted');
     console.log('Current tax year:', currentTaxYear);
@@ -43,7 +45,7 @@ const Expenses = () => {
     
     // Refresh expenses data
     fetchExpenses();
-  }, [currentTaxYear, fetchExpenses, fetchExpenseTypes, expenseTypes.length]);
+  }, [currentTaxYear, fetchExpenses, fetchExpenseTypes, expenseTypes, expenseTypes.length]);
   
   // Debug expense type selection
   useEffect(() => {
@@ -316,7 +318,12 @@ const Expenses = () => {
                 {expenses.map((expense) => (
                   <tr key={expense.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {expense.expense_type ? expense.expense_type.name : 'Unknown'}
+                      {/* Improved expense type display with better error handling */}
+                      {expense.expense_type && expense.expense_type.name 
+                        ? expense.expense_type.name 
+                        : expense.expense_type_id 
+                          ? `Type ID: ${expense.expense_type_id}` 
+                          : 'Unknown'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {expense.description || '-'}

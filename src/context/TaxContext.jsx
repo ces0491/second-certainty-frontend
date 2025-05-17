@@ -22,7 +22,12 @@ export const TaxProvider = ({ children }) => {
     setError(null);
     
     try {
+      console.log(`Calculating tax for user ${currentUser.id}, tax year ${currentTaxYear}`);
+      
       const data = await calculateTax(currentUser.id, currentTaxYear);
+      
+      console.log('Tax calculation result:', data);
+      
       setTaxCalculation(data);
     } catch (err) {
       console.error('Error calculating tax:', err);
@@ -32,16 +37,27 @@ export const TaxProvider = ({ children }) => {
     }
   }, [currentUser, currentTaxYear]);
 
-  // Fetch provisional tax
+  // Enhanced fetchProvisionalTax function
   const fetchProvisionalTax = useCallback(async () => {
-    if (!currentUser || !currentUser.is_provisional_taxpayer) return;
+    if (!currentUser) return;
     
     setLoading(true);
     setError(null);
     
     try {
+      console.log(`Calculating provisional tax for user ${currentUser.id}, tax year ${currentTaxYear}`);
+      
       const data = await calculateProvisionalTax(currentUser.id, currentTaxYear);
-      setProvisionalTax(data);
+      
+      console.log('Provisional tax calculation result:', data);
+      
+      // Validate the data structure
+      if (data) {
+        setProvisionalTax(data);
+      } else {
+        console.warn('Received empty data from provisional tax calculation');
+        setError('Could not calculate provisional tax. Please ensure you have income data for the current tax year.');
+      }
     } catch (err) {
       console.error('Error calculating provisional tax:', err);
       setError(typeof err === 'string' ? err : err.message || 'Failed to calculate provisional tax');
@@ -56,7 +72,12 @@ export const TaxProvider = ({ children }) => {
     setError(null);
     
     try {
+      console.log(`Fetching tax brackets for tax year ${year}`);
+      
       const data = await getTaxBrackets(year);
+      
+      console.log('Tax brackets result:', data);
+      
       setTaxBrackets(data);
     } catch (err) {
       console.error('Error fetching tax brackets:', err);
@@ -83,6 +104,7 @@ export const TaxProvider = ({ children }) => {
 
   // Change tax year
   const changeTaxYear = useCallback((taxYear) => {
+    console.log('Changing tax year to:', taxYear);
     setCurrentTaxYear(taxYear);
   }, []);
 
@@ -94,7 +116,12 @@ export const TaxProvider = ({ children }) => {
     setError(null);
     
     try {
+      console.log(`Calculating custom tax for user ${currentUser.id} with data:`, calculationData);
+      
       const data = await calculateCustomTax(currentUser.id, calculationData);
+      
+      console.log('Custom tax calculation result:', data);
+      
       return data;
     } catch (err) {
       console.error('Error calculating custom tax:', err);
