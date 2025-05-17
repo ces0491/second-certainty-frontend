@@ -1,8 +1,8 @@
 // src/components/tax/TaxBrackets.jsx - Fix for tax bracket display
 import React, { useState, useEffect } from 'react';
 import { useTaxCalc } from '../../hooks/useTaxCalc';
-import Loading from '../components/common/Loading';
-import Alert from '../components/common/Alert';
+import Loading from '../../components/common/Loading';
+import Alert from '../../components/common/Alert';
 import { formatCurrency, formatPercentage } from '../../utils/formatters';
 
 const TaxBrackets = () => {
