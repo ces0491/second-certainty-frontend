@@ -13,38 +13,61 @@ export const ExpenseProvider = ({ children }) => {
   const [currentTaxYear, setCurrentTaxYear] = useState('2025-2026');
   const { currentUser } = useContext(AuthContext);
 
-  // Use useCallback for fetchExpenses to prevent infinite loops
+  // Improved fetchExpenses function with better error handling
   const fetchExpenses = useCallback(async () => {
     if (!currentUser) return;
-    if (loading) return; // Still check loading, but don't depend on it
     
     setLoading(true);
+    setError(null);
+    
     try {
+      console.log('Fetching expenses for user:', currentUser.id, 'tax year:', currentTaxYear);
       const data = await getExpenses(currentUser.id, currentTaxYear);
-      setExpenses(data);
+      
+      // Check if data is an array before setting it
+      if (Array.isArray(data)) {
+        console.log('Expenses fetched successfully:', data.length, 'items');
+        setExpenses(data);
+      } else {
+        console.error('Unexpected data format for expenses:', data);
+        setExpenses([]);
+        setError('Received invalid expense data from the server');
+      }
     } catch (err) {
       console.error('Error fetching expenses:', err);
       setError(err.message || 'Failed to fetch expense data');
+      setExpenses([]); // Set empty array on error to prevent rendering issues
     } finally {
       setLoading(false);
     }
-  }, [currentUser, currentTaxYear, loading]);
+  }, [currentUser, currentTaxYear]);
 
-  // Use useCallback for fetchExpenseTypes too
+  // Improved fetchExpenseTypes function with better error handling
   const fetchExpenseTypes = useCallback(async () => {
     setLoading(true);
     setError(null);
     
     try {
+      console.log('Fetching expense types');
       const types = await getExpenseTypes();
-      setExpenseTypes(types);
+      
+      // Check if types is an array before setting it
+      if (Array.isArray(types)) {
+        console.log('Expense types fetched successfully:', types.length, 'items');
+        setExpenseTypes(types);
+      } else {
+        console.error('Unexpected data format for expense types:', types);
+        setExpenseTypes([]);
+        setError('Received invalid expense type data from the server');
+      }
     } catch (err) {
       console.error('Error fetching expense types:', err);
       setError(err.message || 'Failed to fetch expense types');
+      setExpenseTypes([]); // Set empty array on error to prevent rendering issues
     } finally {
       setLoading(false);
     }
-  }, []); // No dependencies since it doesn't depend on any state or props
+  }, []);
 
   // Effect to fetch expense types on mount
   useEffect(() => {
@@ -56,61 +79,116 @@ export const ExpenseProvider = ({ children }) => {
     if (currentUser) {
       fetchExpenses();
     }
-  }, [currentUser, currentTaxYear, fetchExpenses]); // Now includes fetchExpenses as a dependency
+  }, [currentUser, currentTaxYear, fetchExpenses]);
 
-  // Other methods can be converted to useCallback too for consistency
+  // Improved addExpenseItem function with better error handling
   const addExpenseItem = useCallback(async (expenseData) => {
     setLoading(true);
     setError(null);
     
     try {
-      const newExpense = await addExpense(currentUser.id, {
+      // Ensure expense_type_id is an integer
+      const parsedExpenseData = {
         ...expenseData,
+        expense_type_id: parseInt(expenseData.expense_type_id),
+        amount: Number(expenseData.amount),
         tax_year: currentTaxYear
-      });
-      setExpenses([...expenses, newExpense]);
-      return { success: true, data: newExpense };
+      };
+      
+      console.log('Adding expense with data:', parsedExpenseData);
+      
+      // Call the API function
+      const newExpense = await addExpense(currentUser.id, parsedExpenseData);
+      
+      console.log('Expense added successfully:', newExpense);
+      
+      // Validate the response
+      if (newExpense && typeof newExpense === 'object') {
+        // Update state with new expense
+        setExpenses(prevExpenses => [...prevExpenses, newExpense]);
+        
+        // Fetch updated expenses to ensure consistency
+        fetchExpenses();
+        
+        return { success: true, data: newExpense };
+      } else {
+        throw new Error('Received invalid response from server');
+      }
     } catch (err) {
+      console.error('Error adding expense:', err);
       setError(err.message || 'Failed to add expense');
       return { success: false, error: err.message || 'Failed to add expense' };
     } finally {
       setLoading(false);
     }
-  }, [currentUser, currentTaxYear, expenses]);
+  }, [currentUser, currentTaxYear, fetchExpenses]);
 
+  // Improved updateExpenseItem function
   const updateExpenseItem = useCallback(async (expenseId, expenseData) => {
     setLoading(true);
     setError(null);
     
     try {
-      const updatedExpense = await updateExpense(currentUser.id, expenseId, expenseData);
-      setExpenses(expenses.map(expense => expense.id === expenseId ? updatedExpense : expense));
+      // Ensure expense_type_id is an integer if it exists
+      const parsedExpenseData = {
+        ...expenseData,
+        expense_type_id: expenseData.expense_type_id ? parseInt(expenseData.expense_type_id) : undefined,
+        amount: Number(expenseData.amount)
+      };
+      
+      console.log('Updating expense with ID:', expenseId, 'and data:', parsedExpenseData);
+      
+      const updatedExpense = await updateExpense(currentUser.id, expenseId, parsedExpenseData);
+      
+      console.log('Expense updated successfully:', updatedExpense);
+      
+      // Update state with updated expense
+      setExpenses(prevExpenses => 
+        prevExpenses.map(expense => 
+          expense.id === expenseId ? updatedExpense : expense
+        )
+      );
+      
       return { success: true, data: updatedExpense };
     } catch (err) {
+      console.error('Error updating expense:', err);
       setError(err.message || 'Failed to update expense');
       return { success: false, error: err.message || 'Failed to update expense' };
     } finally {
       setLoading(false);
     }
-  }, [currentUser, expenses]);
+  }, [currentUser]);
 
+  // Improved deleteExpenseItem function
   const deleteExpenseItem = useCallback(async (expenseId) => {
     setLoading(true);
     setError(null);
     
     try {
+      console.log('Deleting expense with ID:', expenseId);
+      
       await deleteExpense(currentUser.id, expenseId);
-      setExpenses(expenses.filter(expense => expense.id !== expenseId));
+      
+      console.log('Expense deleted successfully');
+      
+      // Update state by removing deleted expense
+      setExpenses(prevExpenses => 
+        prevExpenses.filter(expense => expense.id !== expenseId)
+      );
+      
       return { success: true };
     } catch (err) {
+      console.error('Error deleting expense:', err);
       setError(err.message || 'Failed to delete expense');
       return { success: false, error: err.message || 'Failed to delete expense' };
     } finally {
       setLoading(false);
     }
-  }, [currentUser, expenses]);
+  }, [currentUser]);
 
+  // Improved changeTaxYear function
   const changeTaxYear = useCallback((taxYear) => {
+    console.log('Changing tax year to:', taxYear);
     setCurrentTaxYear(taxYear);
   }, []);
 

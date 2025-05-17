@@ -14,27 +14,38 @@ export const IncomeProvider = ({ children }) => {
 
   // Use useCallback for fetchIncomes to prevent infinite loops
   const fetchIncomes = useCallback(async () => {
-    if (!currentUser) return;
-    if (loading) return; // Still check loading, but don't depend on it
-    
-    setLoading(true);
-    try {
-      const data = await getIncomes(currentUser.id, currentTaxYear);
+  if (!currentUser) return;
+  
+  setLoading(true);
+  try {
+    const data = await getIncomes(currentUser.id, currentTaxYear);
+    // Check if data is an array before setting it
+    if (Array.isArray(data)) {
       setIncomes(data);
-    } catch (err) {
-      console.error('Error fetching incomes:', err);
-      setError(err.message || 'Failed to fetch income data');
-    } finally {
-      setLoading(false);
+    } else {
+      console.error('Unexpected data format for incomes:', data);
+      setIncomes([]);
     }
-  }, [currentUser, currentTaxYear, loading]);
+  } catch (err) {
+    console.error('Error fetching incomes:', err);
+    setError(err.message || 'Failed to fetch income data');
+    setIncomes([]); // Set empty array on error to prevent rendering issues
+  } finally {
+    setLoading(false);
+  }
+}, [currentUser, currentTaxYear]);
 
   // Effect to fetch incomes when user or tax year changes
-  useEffect(() => {
-    if (currentUser) {
-      fetchIncomes();
-    }
-  }, [currentUser, currentTaxYear, fetchIncomes]); // Now includes fetchIncomes
+useEffect(() => {
+  // Log component mounting for debugging
+  console.log('Component mounted, current tax year:', currentTaxYear);
+  
+  // Force a refresh of data
+  if (currentUser) {
+    console.log('Fetching data for user:', currentUser.id);
+    fetchIncomes();
+  }
+}, [currentUser, currentTaxYear]);
 
   // Other methods can be converted to useCallback too for consistency
   const addIncomeItem = useCallback(async (incomeData) => {

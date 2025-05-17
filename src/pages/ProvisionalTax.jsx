@@ -128,7 +128,7 @@ const ProvisionalTax = () => {
                 <div className="text-right">
                   <p className="text-sm text-gray-600">Amount</p>
                   <p className="text-2xl font-bold text-sc-green-600">
-                    {formatCurrency(provisionalTax.second_payment.amount)}
+                    {formatCurrency(provisionalTax?.second_payment?.amount ? 
                       safeNumber(provisionalTax.second_payment.amount) : 0)}
                   </p>
                 </div>
@@ -157,15 +157,15 @@ const ProvisionalTax = () => {
                 <div>
                   <p className="text-sm text-gray-600">Total Annual Tax</p>
                   <p className="text-xl font-bold text-gray-800">
-                    {formatCurrency(provisionalTax.total_tax)}
-                      safeNumber(provisionalTax.total_tax.amount) : 0)}
+                    {formatCurrency(provisionalTax?.total_tax ? 
+                      safeNumber(provisionalTax.total_tax) : 0)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Taxable Income</p>
                   <p className="text-xl font-bold text-gray-800">
-                    {formatCurrency(provisionalTax.taxable_income)}
-                      safeNumber(provisionalTax.taxable_income.amount) : 0)}
+                    {formatCurrency(provisionalTax?.taxable_income ? 
+                      safeNumber(provisionalTax.taxable_income) : 0)}
                   </p>
                 </div>
                 <div>

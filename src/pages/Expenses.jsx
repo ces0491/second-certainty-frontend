@@ -1,5 +1,5 @@
 // src/pages/Expenses.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useExpenses } from '../hooks/useExpenses';
 import Loading from '../components/common/Loading';
 import Alert from '../components/common/Alert';
@@ -14,7 +14,9 @@ const Expenses = () => {
     currentTaxYear, 
     changeTaxYear, 
     addExpense: addExpenseItem, 
-    deleteExpense: deleteExpenseItem 
+    deleteExpense: deleteExpenseItem,
+    fetchExpenses,
+    fetchExpenseTypes
   } = useExpenses();
   
   const [isAddingExpense, setIsAddingExpense] = useState(false);
@@ -28,12 +30,44 @@ const Expenses = () => {
   // Available tax years
   const TAX_YEARS = ['2025-2026', '2024-2025', '2023-2024', '2022-2023'];
   
+  // Force refresh data on component mount
+  useEffect(() => {
+    console.log('Expenses component mounted');
+    console.log('Current tax year:', currentTaxYear);
+    console.log('Available expense types:', expenseTypes);
+    
+    // Refresh expense types if empty
+    if (expenseTypes.length === 0) {
+      fetchExpenseTypes();
+    }
+    
+    // Refresh expenses data
+    fetchExpenses();
+  }, [currentTaxYear, fetchExpenses, fetchExpenseTypes, expenseTypes.length]);
+  
+  // Debug expense type selection
+  useEffect(() => {
+    if (newExpense.expense_type_id) {
+      console.log('Selected expense type ID:', newExpense.expense_type_id);
+      const selectedType = expenseTypes.find(
+        type => type.id === parseInt(newExpense.expense_type_id)
+      );
+      console.log('Selected expense type:', selectedType);
+    }
+  }, [newExpense.expense_type_id, expenseTypes]);
+  
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
-    setNewExpense({
-      ...newExpense,
-      [name]: type === 'number' ? (value === '' ? '' : Number(value)) : value
+    const updatedValue = type === 'number' ? (value === '' ? '' : value) : value;
+    
+    setNewExpense(prev => {
+      const updated = {
+        ...prev,
+        [name]: updatedValue
+      };
+      console.log('Updated expense form state:', updated);
+      return updated;
     });
   };
   
@@ -46,15 +80,21 @@ const Expenses = () => {
     }
     
     try {
-      // Ensure amount is a number
+      // Create a new object with explicit properties
       const expenseData = {
-        ...newExpense,
-        amount: Number(newExpense.amount)
+        expense_type_id: parseInt(newExpense.expense_type_id),
+        description: newExpense.description || '',
+        amount: Number(newExpense.amount),
+        tax_year: currentTaxYear
       };
+      
+      console.log('Submitting expense data:', expenseData);
       
       const result = await addExpenseItem(expenseData);
       
       if (result.success) {
+        console.log('Expense added successfully:', result.data);
+        
         // Reset form
         setNewExpense({
           expense_type_id: '',
@@ -65,11 +105,15 @@ const Expenses = () => {
         // Close form
         setIsAddingExpense(false);
         setFormError('');
+        
+        // Refresh expenses
+        fetchExpenses();
       } else {
+        console.error('Error adding expense:', result.error);
         setFormError(result.error || 'Failed to add expense.');
       }
     } catch (err) {
-      console.error('Error adding expense:', err);
+      console.error('Exception when adding expense:', err);
       setFormError(err.message || 'An unexpected error occurred. Please try again.');
     }
   };
@@ -81,25 +125,39 @@ const Expenses = () => {
     }
     
     try {
+      console.log('Deleting expense with ID:', id);
       const result = await deleteExpenseItem(id);
       
-      if (!result.success) {
+      if (result.success) {
+        console.log('Expense deleted successfully');
+      } else {
+        console.error('Error deleting expense:', result.error);
         setFormError(result.error || 'Failed to delete expense.');
       }
     } catch (err) {
-      console.error('Error deleting expense:', err);
+      console.error('Exception when deleting expense:', err);
       setFormError(err.message || 'An unexpected error occurred. Please try again.');
     }
   };
   
-  // Calculate total expenses
-  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  // Calculate total expenses with error handling
+  const totalExpenses = expenses && Array.isArray(expenses) 
+    ? expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0)
+    : 0;
   
   // Handle tax year change
   const handleTaxYearChange = (e) => {
-    changeTaxYear(e.target.value);
+    const newYear = e.target.value;
+    console.log('Changing tax year from:', currentTaxYear, 'to:', newYear);
+    changeTaxYear(newYear);
   };
   
+  // Debug expenses
+  useEffect(() => {
+    console.log('Current expenses:', expenses);
+  }, [expenses]);
+  
+  // Show loading screen only when first loading, not during operations
   if (loading && !expenses.length) {
     return <Loading />;
   }
@@ -148,10 +206,21 @@ const Expenses = () => {
                 onChange={handleInputChange}
               >
                 <option value="">Select Expense Type</option>
-                {expenseTypes.map((type) => (
-                  <option key={type.id} value={type.id}>{type.name}</option>
-                ))}
+                {expenseTypes && expenseTypes.length > 0 ? (
+                  expenseTypes.map((type) => (
+                    <option key={type.id} value={type.id}>
+                      {type.name}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No expense types available</option>
+                )}
               </select>
+              {expenseTypes.length === 0 && (
+                <p className="text-sm text-red-500 mt-1">
+                  Warning: No expense types available. Please try refreshing the page.
+                </p>
+              )}
             </div>
             
             <div>
@@ -218,9 +287,9 @@ const Expenses = () => {
           <h2 className="text-xl font-medium text-gray-800">Expenses</h2>
         </div>
         
-        {loading ? (
+        {loading && expenses.length > 0 ? (
           <Loading />
-        ) : expenses.length === 0 ? (
+        ) : !expenses || expenses.length === 0 ? (
           <div className="p-6 text-center">
             <p className="text-gray-500">No expenses found. Add your first expense to get started.</p>
           </div>
@@ -253,7 +322,7 @@ const Expenses = () => {
                       {expense.description || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatCurrency(expense.amount)}
+                      {formatCurrency(expense.amount || 0)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button

@@ -84,7 +84,7 @@ const TaxBrackets = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {bracket.upper_limit 
                         ? `${formatCurrency(bracket.lower_limit)} - ${formatCurrency(bracket.upper_limit)}`
-                        : `${formatCurrency(bracket.lower_limit)} ${formatCurrency(bracket.upper_limit)}`
+                        : `${formatCurrency(bracket.lower_limit)} and above`
                       }
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
