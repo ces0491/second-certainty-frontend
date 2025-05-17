@@ -1,5 +1,5 @@
 // src/pages/Dashboard.jsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useAuth } from '../hooks/useAuth';
 import { useIncome } from '../hooks/useIncome';
@@ -18,58 +18,66 @@ const Dashboard = () => {
   const { expenses, loading: expensesLoading, error: expensesError, fetchExpenses } = useExpenses(); 
   const { taxCalculation, loading: taxLoading, error: taxError, fetchTaxCalculation } = useTaxCalc();
   
+  // Add forcedLoading state
+  const [forcedLoading, setForcedLoading] = useState(true);
+  
   // Track overall loading and error states
   const loading = incomesLoading || expensesLoading || taxLoading;
   const error = incomesError || expensesError || taxError;
   
+  // Handle data fetching
   useEffect(() => {
-  const fetchData = async () => {
-    if (!incomesLoading) {
-      await fetchIncomes();
+    const fetchData = async () => {
+      try {
+        if (!incomesLoading) {
+          await fetchIncomes();
+        }
+        if (!expensesLoading) {
+          await fetchExpenses();
+        }
+        if (!taxLoading) {
+          await fetchTaxCalculation();
+        }
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+      }
+    };
+    
+    fetchData();
+  }, []); // Simplified dependencies to avoid loops
+  
+  // Add a timeout for the loading state
+  useEffect(() => {
+    let timeout;
+    if (loading) {
+      timeout = setTimeout(() => {
+        // Force exit loading state after 10 seconds
+        setForcedLoading(false);
+      }, 10000);
+    } else {
+      // When loading completes normally, also exit forced loading
+      setForcedLoading(false);
     }
-    if (!expensesLoading) {
-      await fetchExpenses();
-    }
-    if (!taxLoading) {
-      await fetchTaxCalculation();
-    }
+    
+    return () => clearTimeout(timeout);
+  }, [loading]);
+  
+  // Format currency values
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('en-ZA', { 
+      style: 'currency', 
+      currency: 'ZAR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0 
+    }).format(value);
   };
   
-  fetchData();
-}, []); // Simplified dependencies to avoid infinite loops
-
-// Add a timeout for the loading state
-useEffect(() => {
-  let timeout;
-  if (loading) {
-    timeout = setTimeout(() => {
-      // Force exit loading state after 10 seconds
-      setForcedLoading(false);
-    }, 10000);
-  }
-  
-  return () => clearTimeout(timeout);
-}, [loading]);
-
-// Modify the render condition to account for delayed or missing data
-if (loading && !forcedLoading) {
-  return <Loading />;
-}
-
-// Show content even if some data is missing
-return (
-  <div className="container mx-auto px-4 py-8">
-    {/* Dashboard content with proper null checks */}
-    {/* ... */}
-  </div>
-);
-
   // Generate monthly data from annual figures
   const generateMonthlyData = () => {
     if (!taxCalculation) return [];
     
-    const annualTax = taxCalculation.final_tax;
-    const annualIncome = taxCalculation.gross_income;
+    const annualTax = taxCalculation.final_tax || 0;
+    const annualIncome = taxCalculation.gross_income || 0;
     
     return Array.from({ length: 12 }, (_, i) => {
       const month = new Date(2025, i, 1).toLocaleString('default', { month: 'short' });
@@ -83,22 +91,27 @@ return (
   
   // Prepare income data for pie chart
   const getIncomeData = () => {
+    if (!incomes || !incomes.length) return [];
+    
     return incomes.map((income, index) => ({
-      name: income.source_type,
-      value: income.annual_amount,
+      name: income.source_type || 'Unknown',
+      value: income.annual_amount || 0,
       color: COLORS[index % COLORS.length]
     }));
   };
 
-  if (loading) {
+  // Show loading only if still in loading state and forcedLoading is true
+  if (loading && forcedLoading) {
     return <Loading />;
   }
 
+  // Show error if any
   if (error) {
     return <Alert type="error" message={error} />;
   }
 
-  if (!taxCalculation || !incomes.length) {
+  // Show empty state if no data
+  if (!taxCalculation || !incomes || incomes.length === 0) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-md">
         <p className="text-gray-500">No tax data available. Please make sure you've added income sources.</p>
