@@ -3,10 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import Alert from '../components/common/Alert';
 import Loading from '../components/common/Loading';
-import Button from '../components/common/Button';
+
 
 const Profile = () => {
-  const { currentUser, loading, error, updateProfile } = useAuth();
+  const { currentUser, loading, error } = useAuth(); 
   const [formData, setFormData] = useState({
     name: '',
     surname: '',
@@ -57,10 +57,8 @@ const Profile = () => {
     setFormError('');
     setSuccessMessage('');
     
-    // THIS DOESN'T WORK
-    // Implement update profile logic
-    // ...
-    
+    // TODO: Implement update profile logic
+    // For now just show success message
     setSuccessMessage('Profile updated successfully!');
     setIsEditing(false);
   };
@@ -82,10 +80,8 @@ const Profile = () => {
     }
     
     try {
-      // THIS DOESN'T WORK
-      // Implement password change API call here
-      // Eg:
-      // await api.post('/auth/change-password', passwordData);
+      // TODO: Implement password change API call
+      // Mock success for now
       
       // Reset form
       setPasswordData({
