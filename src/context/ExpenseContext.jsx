@@ -1,6 +1,6 @@
 // src/context/ExpenseContext.jsx
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { getExpenses, addExpense, updateExpense, deleteExpense, getExpenseTypes } from '../api/expenses';
+import { getExpenses, addExpense, deleteExpense, getExpenseTypes } from '../api/expenses';
 import { AuthContext } from './AuthContext';
 
 export const ExpenseContext = createContext();

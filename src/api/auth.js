@@ -35,7 +35,7 @@ export const login = async (email, password) => {
     if (error.response) {
       throw error.response.data;
     } else if (error.request) {
-      throw new Error('No response from server');
+      throw new Error('No response from server - please wait up to 50s and try again');
     } else {
       throw error;
     }

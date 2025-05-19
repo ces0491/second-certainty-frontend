@@ -7,7 +7,6 @@ import Alert from '../components/common/Alert';
 import { formatCurrency } from '../utils/formatters';
 
 const Expenses = () => {
-  const { currentUser } = useAuth();
   const { 
     expenses, 
     expenseTypes, 
