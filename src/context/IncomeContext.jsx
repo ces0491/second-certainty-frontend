@@ -38,7 +38,7 @@ export const IncomeProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser, currentTaxYear, loading]);
+  }, [currentUser, currentTaxYear]);
 
   // Effect to fetch incomes when user or tax year changes
   // Fixed ESLint warning by adding fetchIncomes dependency

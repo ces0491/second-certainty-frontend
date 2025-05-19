@@ -1,7 +1,6 @@
 // src/pages/Expenses.jsx
 import React, { useState, useEffect } from 'react';
 import { useExpenses } from '../hooks/useExpenses';
-import { useAuth } from '../hooks/useAuth';
 import Loading from '../components/common/Loading';
 import Alert from '../components/common/Alert';
 import { formatCurrency } from '../utils/formatters';
