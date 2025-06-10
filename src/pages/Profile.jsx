@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import Layout from '../components/Layout';
+import Layout from '../components/common/Layout';
 
 const Profile = () => {
   const { currentUser, loading, error, updateProfile, changePassword } = useAuth(); 
