@@ -1,8 +1,9 @@
+// src/api/auth.js
 import axios from 'axios';
 
-// Create axios instance with base configuration
+// Use the same API base URL as index.js
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000/api',
+  baseURL: process.env.REACT_APP_API_BASE_URL || 'https://second-certainty-api.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -27,93 +28,84 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid, remove it and redirect to login
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user_data');
-      window.location.href = '/login';
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
 );
 
 /**
- * User login
- * @param {string} email - User email
- * @param {string} password - User password
- * @returns {Promise} - API response promise
+ * User login - FIXED to use correct endpoint and format
  */
 export const login = async (email, password) => {
   try {
-    const response = await api.post('/auth/login', { email, password });
-    const { access_token, user } = response.data;
+    // Create FormData for OAuth2PasswordRequestForm (backend expects this format)
+    const formData = new FormData();
+    formData.append('username', email); // OAuth2 uses 'username' field
+    formData.append('password', password);
+
+    const response = await api.post('/auth/token', formData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
     
-    // Store token and user data
+    const { access_token } = response.data;
+    
+    // Store token
     localStorage.setItem('auth_token', access_token);
-    localStorage.setItem('user_data', JSON.stringify(user));
     
-    return response.data;
+    // Get user data after successful login
+    const userResponse = await api.get('/auth/me');
+    localStorage.setItem('user_data', JSON.stringify(userResponse.data));
+    
+    return { user: userResponse.data, access_token };
   } catch (error) {
+    console.error('Login error:', error);
     throw error.response ? error.response.data : new Error('Login failed');
   }
 };
 
 /**
- * User registration
- * @param {Object} userData - User registration data
- * @returns {Promise} - API response promise
+ * User registration - FIXED format
  */
 export const register = async (userData) => {
   try {
     const response = await api.post('/auth/register', userData);
     return response.data;
   } catch (error) {
+    console.error('Registration error:', error);
     throw error.response ? error.response.data : new Error('Registration failed');
   }
 };
 
-/**
- * Get current user profile
- * @returns {Promise} - API response promise
- */
+// Rest of the functions remain the same...
 export const getCurrentUser = async () => {
   try {
     const response = await api.get('/auth/me');
-    
-    // Update stored user data
     localStorage.setItem('user_data', JSON.stringify(response.data));
-    
     return response.data;
   } catch (error) {
-    // If getting current user fails, remove stored auth data
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_data');
     throw error.response ? error.response.data : new Error('Failed to get user data');
   }
 };
 
-/**
- * Update user profile
- * @param {Object} profileData - Profile data to update
- * @returns {Promise} - API response promise
- */
 export const updateProfile = async (profileData) => {
   try {
     const response = await api.put('/auth/profile', profileData);
-    
-    // Update stored user data
     localStorage.setItem('user_data', JSON.stringify(response.data));
-    
     return response.data;
   } catch (error) {
     throw error.response ? error.response.data : new Error('Profile update failed');
   }
 };
 
-/**
- * Change user password
- * @param {Object} passwordData - Password change data
- * @returns {Promise} - API response promise
- */
 export const changePassword = async (passwordData) => {
   try {
     const response = await api.put('/auth/change-password', passwordData);
@@ -123,36 +115,21 @@ export const changePassword = async (passwordData) => {
   }
 };
 
-/**
- * User logout
- * @returns {Promise} - API response promise
- */
 export const logout = async () => {
   try {
-    // Call the logout endpoint (optional since JWT tokens can't be invalidated server-side)
     await api.post('/auth/logout');
   } catch (error) {
-    // Even if the API call fails, we should still clear local storage
     console.warn('Logout API call failed:', error);
   } finally {
-    // Always clear local storage
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_data');
   }
 };
 
-/**
- * Check if user is authenticated
- * @returns {boolean} - Authentication status
- */
 export const isAuthenticated = () => {
   return !!localStorage.getItem('auth_token');
 };
 
-/**
- * Get stored user data
- * @returns {Object|null} - User data or null if not found
- */
 export const getStoredUser = () => {
   try {
     const userData = localStorage.getItem('user_data');

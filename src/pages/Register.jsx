@@ -1,3 +1,4 @@
+// src/pages/Register.jsx
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
@@ -47,11 +48,28 @@ const Register = () => {
       return false;
     }
 
+    // Validate names are not just whitespace
+    if (formData.name.trim().length === 0 || formData.surname.trim().length === 0) {
+      setFormError('Name and surname cannot be empty');
+      return false;
+    }
+
     // Validate date of birth (must be in the past)
     const birthDate = new Date(formData.date_of_birth);
     const today = new Date();
     if (birthDate >= today) {
       setFormError('Date of birth must be in the past');
+      return false;
+    }
+
+    // Check if person is at least 16 years old
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    if (age < 16) {
+      setFormError('You must be at least 16 years old to register');
       return false;
     }
 
@@ -66,20 +84,70 @@ const Register = () => {
       return;
     }
 
-    // Remove confirmPassword as it's not needed for API
+    // Remove confirmPassword and prepare data for API
     const { confirmPassword, ...apiData } = formData;
+    
+    // Ensure names are trimmed
+    apiData.name = apiData.name.trim();
+    apiData.surname = apiData.surname.trim();
+    apiData.email = apiData.email.trim().toLowerCase();
 
     try {
+      console.log('Submitting registration:', { ...apiData, password: '[HIDDEN]' });
+      
       const result = await register(apiData);
+      
       if (result.success) {
+        console.log('Registration successful');
         // Redirect to login page after successful registration
-        navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
+        navigate('/login', { 
+          state: { 
+            message: 'Registration successful! Please log in with your new account.' 
+          } 
+        });
       } else {
-        setFormError(result.error || 'Registration failed. Please try again.');
+        // Handle specific error messages
+        let errorMessage = 'Registration failed. Please try again.';
+        
+        if (result.error) {
+          if (typeof result.error === 'string') {
+            errorMessage = result.error;
+          } else if (result.error.detail) {
+            errorMessage = result.error.detail;
+          } else if (result.error.message) {
+            errorMessage = result.error.message;
+          }
+        }
+        
+        setFormError(errorMessage);
       }
     } catch (err) {
-      setFormError('An unexpected error occurred. Please try again later.');
       console.error('Registration error:', err);
+      
+      // Handle different types of errors
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      
+      if (err.response) {
+        // Server responded with error status
+        if (err.response.status === 400) {
+          if (err.response.data?.detail) {
+            errorMessage = err.response.data.detail;
+          } else {
+            errorMessage = 'Invalid registration data. Please check your inputs.';
+          }
+        } else if (err.response.status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else if (err.response.data?.detail) {
+          errorMessage = err.response.data.detail;
+        }
+      } else if (err.request) {
+        // Network error
+        errorMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setFormError(errorMessage);
     }
   };
 
@@ -97,6 +165,7 @@ const Register = () => {
         
         {formError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <strong className="font-bold">Error: </strong>
             <span className="block sm:inline">{formError}</span>
           </div>
         )}
@@ -126,7 +195,7 @@ const Register = () => {
                 autoComplete="new-password"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                placeholder="Password (minimum 8 characters)"
                 value={formData.password}
                 onChange={handleChange}
               />
@@ -180,6 +249,7 @@ const Register = () => {
                 name="date_of_birth"
                 type="date"
                 required
+                max={new Date().toISOString().split('T')[0]}
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-sc-green-500 focus:border-sc-green-500 focus:z-10 sm:text-sm"
                 value={formData.date_of_birth}
                 onChange={handleChange}

@@ -28,26 +28,68 @@ const Login = () => {
       return;
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setFormError('Please enter a valid email address');
+      return;
+    }
+
     try {
       console.log('Submitting login form for:', email);
     
       // Show message for potential cold start
       if (!isWakingUp) {
         setIsWakingUp(true);
-        setTimeout(() => setIsWakingUp(false), 10000); // Show for 10 seconds
+        setTimeout(() => setIsWakingUp(false), 15000); // Show for 15 seconds
       }
     
-      const result = await login(email, password);
+      const result = await login(email.trim(), password);
     
       if (result.success) {
         console.log('Login successful, navigating to dashboard');
         navigate('/dashboard');
       } else {
-        setFormError(result.error || 'Login failed. Please check your credentials.');
+        // Handle specific error messages
+        let errorMessage = 'Login failed. Please check your credentials.';
+        
+        if (result.error) {
+          if (typeof result.error === 'string') {
+            errorMessage = result.error;
+          } else if (result.error.detail) {
+            errorMessage = result.error.detail;
+          } else if (result.error.message) {
+            errorMessage = result.error.message;
+          }
+        }
+        
+        setFormError(errorMessage);
       }
     } catch (err) {
       console.error('Login error in component:', err);
-      setFormError(err.detail || err.message || 'An unexpected error occurred. Please try again later.');
+      
+      // Handle different types of errors
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      
+      if (err.response) {
+        // Server responded with error status
+        if (err.response.status === 401) {
+          errorMessage = 'Invalid email or password. Please check your credentials.';
+        } else if (err.response.status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else if (err.response.data?.detail) {
+          errorMessage = err.response.data.detail;
+        } else if (err.response.data?.message) {
+          errorMessage = err.response.data.message;
+        }
+      } else if (err.request) {
+        // Network error
+        errorMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setFormError(errorMessage);
     } finally {
       setIsWakingUp(false);
     }
@@ -74,6 +116,7 @@ const Login = () => {
         
         {formError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <strong className="font-bold">Error: </strong>
             <span className="block sm:inline">{formError}</span>
           </div>
         )}
