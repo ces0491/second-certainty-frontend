@@ -7,14 +7,12 @@ import api from './index';
  * @param {string} password - User password
  * @returns {Promise} - API response promise with token
  */
-export const login = async (email, password) => {
+export const login = async (email, password, retryCount = 0) => {
   try {
-    // Create FormData for FastAPI's OAuth2PasswordRequestForm
     const formData = new FormData();
-    formData.append('username', email); // FastAPI expects 'username' not 'email'
+    formData.append('username', email);
     formData.append('password', password);
 
-    // Clear any existing tokens
     localStorage.removeItem('auth_token');
     
     const response = await api.post('/auth/token', formData, {
@@ -23,7 +21,6 @@ export const login = async (email, password) => {
       },
     });
 
-    // Store token in localStorage
     if (response.data.access_token) {
       localStorage.setItem('auth_token', response.data.access_token);
     } else {
@@ -35,7 +32,13 @@ export const login = async (email, password) => {
     if (error.response) {
       throw error.response.data;
     } else if (error.request) {
-      throw new Error('No response from server - please wait up to 50s and try again');
+      // Retry once for cold starts
+      if (retryCount === 0) {
+        console.log('Server might be cold starting, retrying...');
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+        return login(email, password, 1);
+      }
+      throw new Error('No response from server - the backend may be starting up (this can take up to 60s on free hosting). Please try again.');
     } else {
       throw error;
     }

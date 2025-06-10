@@ -50,3 +50,12 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+export const pingServer = async () => {
+  try {
+    await api.get('/health', { timeout: 5000 });
+    return true;
+  } catch {
+    return false;
+  }
+};

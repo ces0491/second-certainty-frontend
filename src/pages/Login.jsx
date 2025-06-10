@@ -1,16 +1,22 @@
 // src/pages/Login.jsx
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { pingServer } from '../api/index';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
+  const [isWakingUp, setIsWakingUp] = useState(false);
   const { login, loading } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const message = location.state?.message;
+
+  useEffect(() => {
+    pingServer(); // Wake up the server early
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,8 +30,15 @@ const Login = () => {
 
     try {
       console.log('Submitting login form for:', email);
+    
+      // Show message for potential cold start
+      if (!isWakingUp) {
+        setIsWakingUp(true);
+        setTimeout(() => setIsWakingUp(false), 10000); // Show for 10 seconds
+      }
+    
       const result = await login(email, password);
-      
+    
       if (result.success) {
         console.log('Login successful, navigating to dashboard');
         navigate('/dashboard');
@@ -35,6 +48,8 @@ const Login = () => {
     } catch (err) {
       console.error('Login error in component:', err);
       setFormError(err.detail || err.message || 'An unexpected error occurred. Please try again later.');
+    } finally {
+      setIsWakingUp(false);
     }
   };
 
@@ -63,6 +78,14 @@ const Login = () => {
           </div>
         )}
         
+        {isWakingUp && (
+          <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative" role="alert">
+            <span className="block sm:inline">
+              🔄 Server is starting up (this may take up to 60 seconds on first visit)...
+            </span>
+          </div>
+        )}
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
