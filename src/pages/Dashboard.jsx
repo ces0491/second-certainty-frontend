@@ -65,40 +65,35 @@ const Dashboard = () => {
     return () => clearTimeout(timeout);
   }, [loading]);
   
-  // Generate waterfall chart data for financial flow
-  const generateWaterfallData = () => {
+  // Generate financial summary data (income, expenses, tax, net income)
+  const generateFinancialSummary = () => {
     if (!taxCalculation) return [];
     
     const totalExpenses = expenses?.reduce((sum, expense) => sum + (expense.amount || 0), 0) || 0;
     const grossIncome = taxCalculation.gross_income || 0;
     const taxLiability = taxCalculation.final_tax || 0;
-    const netIncome = grossIncome - totalExpenses - taxLiability;
+    const netIncome = grossIncome - taxLiability;
     
-    // Create waterfall data - using absolute values for better visualization
     return [
       {
         name: 'Gross Income',
         value: grossIncome,
-        color: '#82ca9d',  // Green
-        type: 'positive'
+        color: '#82ca9d'  // Green
       },
       {
         name: 'Expenses',
         value: totalExpenses,
-        color: '#8884d8',  // Purple  
-        type: 'deduction'
+        color: '#8884d8'  // Purple
       },
       {
         name: 'Tax Liability',
         value: taxLiability,
-        color: '#ff8042',  // Orange
-        type: 'deduction'
+        color: '#ff8042'  // Orange
       },
       {
         name: 'Net Income',
-        value: Math.max(0, netIncome), // Ensure non-negative
-        color: '#0088FE',  // Blue
-        type: 'result'
+        value: netIncome,
+        color: '#0088FE'  // Blue
       }
     ];
   };
@@ -136,34 +131,6 @@ const Dashboard = () => {
     }));
   };
 
-  // Custom tooltip for waterfall chart
-  const WaterfallTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
-          <p className="font-medium">{label}</p>
-          <p className="text-sm">
-            Amount: <span className="font-medium">
-              {formatCurrency(data.value)}
-            </span>
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  // Show loading only if still in loading state and forcedLoading is true
-  if (loading && forcedLoading) {
-    return <Loading />;
-  }
-
-  // Show error if any
-  if (error) {
-    return <Alert type="error" message={error} />;
-  }
-
   // Show empty state if no data
   if (!taxCalculation) {
     return (
@@ -185,7 +152,7 @@ const Dashboard = () => {
     );
   }
 
-  const waterfallData = generateWaterfallData();
+  const financialSummary = generateFinancialSummary();
   const incomeBreakdown = getIncomeBreakdown();
   const expenseBreakdown = getExpenseBreakdown();
 
@@ -268,27 +235,24 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* Financial Summary Waterfall Chart - Full Width */}
+      {/* Financial Summary Bar Chart - Full Width */}
       <div className="bg-white rounded-lg shadow p-6 mb-8">
         <h2 className="text-xl font-medium text-gray-800 mb-4">Financial Summary - {currentTaxYear}</h2>
-        <div className="h-80">
+        <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={waterfallData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <BarChart data={financialSummary}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip content={<WaterfallTooltip />} />
+              <Tooltip formatter={(value) => formatCurrency(value)} />
               <Legend />
               <Bar dataKey="value" name="Amount">
-                {waterfallData.map((entry, index) => (
+                {financialSummary.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
-        <div className="mt-4 text-sm text-gray-600">
-          <p>This chart shows your financial summary: starting with gross income, then deducting expenses and taxes to arrive at net income.</p>
         </div>
       </div>
       
