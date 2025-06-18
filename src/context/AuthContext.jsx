@@ -1,5 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { login, register, getCurrentUser, logout, isAuthenticated, updateProfile, changePassword, getStoredUser } from '../api/auth';
+import {
+  login,
+  register,
+  getCurrentUser,
+  logout,
+  isAuthenticated,
+  updateProfile,
+  changePassword,
+  getStoredUser,
+} from '../api/auth';
 
 // Create the authentication context
 const AuthContext = createContext();
@@ -23,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       setLoading(true);
-      
+
       try {
         // Check if user is authenticated
         if (isAuthenticated()) {
@@ -124,7 +133,7 @@ export const AuthProvider = ({ children }) => {
   // Refresh current user data
   const refreshUser = async () => {
     if (!isAuthenticated()) return;
-    
+
     try {
       const userData = await getCurrentUser();
       setCurrentUser(userData);
@@ -160,11 +169,7 @@ export const AuthProvider = ({ children }) => {
     clearError,
   };
 
-  return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
 
 export { AuthContext };

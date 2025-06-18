@@ -1,7 +1,12 @@
 // src/context/TaxContext.jsx
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { calculateTax, calculateCustomTax, calculateProvisionalTax, getTaxBrackets } from '../api/taxCalculator';
+import {
+  calculateTax,
+  calculateCustomTax,
+  calculateProvisionalTax,
+  getTaxBrackets,
+} from '../api/taxCalculator';
 import { AuthContext } from './AuthContext';
 
 export const TaxContext = createContext();
@@ -18,17 +23,17 @@ export const TaxProvider = ({ children }) => {
   // Fetch tax calculation
   const fetchTaxCalculation = useCallback(async () => {
     if (!currentUser) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       console.log(`Calculating tax for user ${currentUser.id}, tax year ${currentTaxYear}`);
-      
+
       const data = await calculateTax(currentUser.id, currentTaxYear);
-      
+
       console.log('Tax calculation result:', data);
-      
+
       setTaxCalculation(data);
     } catch (err) {
       console.error('Error calculating tax:', err);
@@ -44,31 +49,33 @@ export const TaxProvider = ({ children }) => {
       console.log('No current user, skipping provisional tax calculation');
       return;
     }
-    
+
     if (!currentUser.is_provisional_taxpayer) {
       console.log('User is not a provisional taxpayer, skipping calculation');
       return;
     }
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      console.log(`Calculating provisional tax for user ${currentUser.id}, tax year ${currentTaxYear}`);
-      
+      console.log(
+        `Calculating provisional tax for user ${currentUser.id}, tax year ${currentTaxYear}`
+      );
+
       const data = await calculateProvisionalTax(currentUser.id, currentTaxYear);
-      
+
       console.log('Provisional tax calculation result:', data);
-      
+
       // Validate the data structure
       if (data && typeof data === 'object') {
         // Check if we have some data, even if not complete
-        const hasValidData = 
-          data.total_tax !== undefined || 
+        const hasValidData =
+          data.total_tax !== undefined ||
           data.annual_tax !== undefined ||
           data.first_payment !== undefined ||
           data.second_payment !== undefined;
-        
+
         if (hasValidData) {
           setProvisionalTax(data);
           console.log('Successfully set provisional tax data');
@@ -80,7 +87,7 @@ export const TaxProvider = ({ children }) => {
             taxable_income: 0,
             effective_tax_rate: 0,
             first_payment: { amount: 0, due_date: `${currentTaxYear.split('-')[0]}-08-31` },
-            second_payment: { amount: 0, due_date: `${currentTaxYear.split('-')[1]}-02-28` }
+            second_payment: { amount: 0, due_date: `${currentTaxYear.split('-')[1]}-02-28` },
           });
         }
       } else {
@@ -91,15 +98,17 @@ export const TaxProvider = ({ children }) => {
           taxable_income: 0,
           effective_tax_rate: 0,
           first_payment: { amount: 0, due_date: `${currentTaxYear.split('-')[0]}-08-31` },
-          second_payment: { amount: 0, due_date: `${currentTaxYear.split('-')[1]}-02-28` }
+          second_payment: { amount: 0, due_date: `${currentTaxYear.split('-')[1]}-02-28` },
         });
       }
     } catch (err) {
       console.error('Error calculating provisional tax:', err);
-      
+
       // Only set error for actual API failures, not empty data
       if (err.response && err.response.status >= 400) {
-        setError(typeof err === 'string' ? err : err.message || 'Failed to calculate provisional tax');
+        setError(
+          typeof err === 'string' ? err : err.message || 'Failed to calculate provisional tax'
+        );
       } else {
         // For other errors, just log and set empty data
         console.warn('Setting empty provisional tax data due to error:', err);
@@ -108,7 +117,7 @@ export const TaxProvider = ({ children }) => {
           taxable_income: 0,
           effective_tax_rate: 0,
           first_payment: { amount: 0, due_date: `${currentTaxYear.split('-')[0]}-08-31` },
-          second_payment: { amount: 0, due_date: `${currentTaxYear.split('-')[1]}-02-28` }
+          second_payment: { amount: 0, due_date: `${currentTaxYear.split('-')[1]}-02-28` },
         });
       }
     } finally {
@@ -117,26 +126,29 @@ export const TaxProvider = ({ children }) => {
   }, [currentUser, currentTaxYear]);
 
   // Fetch tax brackets
-  const fetchTaxBrackets = useCallback(async (year = currentTaxYear) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      console.log(`Fetching tax brackets for tax year ${year}`);
-      
-      const data = await getTaxBrackets(year);
-      
-      console.log('Tax brackets result:', data);
-      
-      setTaxBrackets(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error('Error fetching tax brackets:', err);
-      setError(typeof err === 'string' ? err : err.message || 'Failed to fetch tax brackets');
-      setTaxBrackets([]); // Set empty array on error
-    } finally {
-      setLoading(false);
-    }
-  }, [currentTaxYear]);
+  const fetchTaxBrackets = useCallback(
+    async (year = currentTaxYear) => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        console.log(`Fetching tax brackets for tax year ${year}`);
+
+        const data = await getTaxBrackets(year);
+
+        console.log('Tax brackets result:', data);
+
+        setTaxBrackets(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Error fetching tax brackets:', err);
+        setError(typeof err === 'string' ? err : err.message || 'Failed to fetch tax brackets');
+        setTaxBrackets([]); // Set empty array on error
+      } finally {
+        setLoading(false);
+      }
+    },
+    [currentTaxYear]
+  );
 
   // Effect to fetch tax brackets on mount or when tax year changes
   useEffect(() => {
@@ -163,28 +175,34 @@ export const TaxProvider = ({ children }) => {
   }, []);
 
   // Calculate custom tax
-  const calculateCustomTaxCalculation = useCallback(async (calculationData) => {
-    if (!currentUser) return null;
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      console.log(`Calculating custom tax for user ${currentUser.id} with data:`, calculationData);
-      
-      const data = await calculateCustomTax(currentUser.id, calculationData);
-      
-      console.log('Custom tax calculation result:', data);
-      
-      return data;
-    } catch (err) {
-      console.error('Error calculating custom tax:', err);
-      setError(typeof err === 'string' ? err : err.message || 'Failed to calculate custom tax');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [currentUser]);
+  const calculateCustomTaxCalculation = useCallback(
+    async (calculationData) => {
+      if (!currentUser) return null;
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        console.log(
+          `Calculating custom tax for user ${currentUser.id} with data:`,
+          calculationData
+        );
+
+        const data = await calculateCustomTax(currentUser.id, calculationData);
+
+        console.log('Custom tax calculation result:', data);
+
+        return data;
+      } catch (err) {
+        console.error('Error calculating custom tax:', err);
+        setError(typeof err === 'string' ? err : err.message || 'Failed to calculate custom tax');
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [currentUser]
+  );
 
   // Context value
   const contextValue = {
@@ -198,12 +216,8 @@ export const TaxProvider = ({ children }) => {
     fetchProvisionalTax,
     fetchTaxBrackets,
     calculateCustomTax: calculateCustomTaxCalculation,
-    changeTaxYear
+    changeTaxYear,
   };
 
-  return (
-    <TaxContext.Provider value={contextValue}>
-      {children}
-    </TaxContext.Provider>
-  );
+  return <TaxContext.Provider value={contextValue}>{children}</TaxContext.Provider>;
 };

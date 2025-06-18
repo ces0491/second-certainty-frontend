@@ -14,7 +14,7 @@ const NotFound = () => {
             The page you're looking for doesn't exist or has been moved.
           </p>
         </div>
-        
+
         <div className="mt-8">
           <Link
             to="/dashboard"

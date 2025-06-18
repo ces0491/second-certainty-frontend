@@ -14,12 +14,12 @@ export const IncomeProvider = ({ children }) => {
 
   const fetchIncomes = useCallback(async () => {
     if (!currentUser) return;
-    
+
     setLoading(true);
     try {
       console.log('Fetching incomes for user:', currentUser.id, 'tax year:', currentTaxYear);
       const data = await getIncomes(currentUser.id, currentTaxYear);
-      
+
       // Check if data is an array before setting it
       if (Array.isArray(data)) {
         console.log('Incomes fetched successfully:', data.length, 'items');
@@ -43,79 +43,88 @@ export const IncomeProvider = ({ children }) => {
     if (currentUser) {
       fetchIncomes();
     }
-  }, [currentUser, currentTaxYear, fetchIncomes]); 
+  }, [currentUser, currentTaxYear, fetchIncomes]);
 
-  const addIncomeItem = useCallback(async (incomeData) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      console.log('Adding income with data:', {
-        ...incomeData,
-        tax_year: currentTaxYear
-      });
-      
-      const newIncome = await addIncome(currentUser.id, {
-        ...incomeData,
-        tax_year: currentTaxYear
-      });
-      
-      console.log('Income added successfully:', newIncome);
-      
-      setIncomes([...incomes, newIncome]);
-      return { success: true, data: newIncome };
-    } catch (err) {
-      console.error('Error adding income:', err);
-      setError(err.message || 'Failed to add income');
-      return { success: false, error: err.message || 'Failed to add income' };
-    } finally {
-      setLoading(false);
-    }
-  }, [currentUser, currentTaxYear, incomes]);
+  const addIncomeItem = useCallback(
+    async (incomeData) => {
+      setLoading(true);
+      setError(null);
 
-  const updateIncomeItem = useCallback(async (incomeId, incomeData) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      console.log('Updating income with ID:', incomeId, 'and data:', incomeData);
-      
-      const updatedIncome = await updateIncome(currentUser.id, incomeId, incomeData);
-      
-      console.log('Income updated successfully:', updatedIncome);
-      
-      setIncomes(incomes.map(income => income.id === incomeId ? updatedIncome : income));
-      return { success: true, data: updatedIncome };
-    } catch (err) {
-      console.error('Error updating income:', err);
-      setError(err.message || 'Failed to update income');
-      return { success: false, error: err.message || 'Failed to update income' };
-    } finally {
-      setLoading(false);
-    }
-  }, [currentUser, incomes]);
+      try {
+        console.log('Adding income with data:', {
+          ...incomeData,
+          tax_year: currentTaxYear,
+        });
 
-  const deleteIncomeItem = useCallback(async (incomeId) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      console.log('Deleting income with ID:', incomeId);
-      
-      await deleteIncome(currentUser.id, incomeId);
-      
-      console.log('Income deleted successfully');
-      
-      setIncomes(incomes.filter(income => income.id !== incomeId));
-      return { success: true };
-    } catch (err) {
-      console.error('Error deleting income:', err);
-      setError(err.message || 'Failed to delete income');
-      return { success: false, error: err.message || 'Failed to delete income' };
-    } finally {
-      setLoading(false);
-    }
-  }, [currentUser, incomes]);
+        const newIncome = await addIncome(currentUser.id, {
+          ...incomeData,
+          tax_year: currentTaxYear,
+        });
+
+        console.log('Income added successfully:', newIncome);
+
+        setIncomes([...incomes, newIncome]);
+        return { success: true, data: newIncome };
+      } catch (err) {
+        console.error('Error adding income:', err);
+        setError(err.message || 'Failed to add income');
+        return { success: false, error: err.message || 'Failed to add income' };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [currentUser, currentTaxYear, incomes]
+  );
+
+  const updateIncomeItem = useCallback(
+    async (incomeId, incomeData) => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        console.log('Updating income with ID:', incomeId, 'and data:', incomeData);
+
+        const updatedIncome = await updateIncome(currentUser.id, incomeId, incomeData);
+
+        console.log('Income updated successfully:', updatedIncome);
+
+        setIncomes(incomes.map((income) => (income.id === incomeId ? updatedIncome : income)));
+        return { success: true, data: updatedIncome };
+      } catch (err) {
+        console.error('Error updating income:', err);
+        setError(err.message || 'Failed to update income');
+        return { success: false, error: err.message || 'Failed to update income' };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [currentUser, incomes]
+  );
+
+  const deleteIncomeItem = useCallback(
+    async (incomeId) => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        console.log('Deleting income with ID:', incomeId);
+
+        await deleteIncome(currentUser.id, incomeId);
+
+        console.log('Income deleted successfully');
+
+        setIncomes(incomes.filter((income) => income.id !== incomeId));
+        return { success: true };
+      } catch (err) {
+        console.error('Error deleting income:', err);
+        setError(err.message || 'Failed to delete income');
+        return { success: false, error: err.message || 'Failed to delete income' };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [currentUser, incomes]
+  );
 
   const changeTaxYear = useCallback((taxYear) => {
     console.log('Changing tax year to:', taxYear);
@@ -133,7 +142,7 @@ export const IncomeProvider = ({ children }) => {
         addIncome: addIncomeItem,
         updateIncome: updateIncomeItem,
         deleteIncome: deleteIncomeItem,
-        changeTaxYear
+        changeTaxYear,
       }}
     >
       {children}

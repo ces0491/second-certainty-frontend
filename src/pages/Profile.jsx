@@ -2,25 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const Profile = () => {
-  const { currentUser, loading, error, updateProfile, changePassword } = useAuth(); 
+  const { currentUser, loading, error, updateProfile, changePassword } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     surname: '',
     email: '',
     date_of_birth: '',
-    is_provisional_taxpayer: false
+    is_provisional_taxpayer: false,
   });
-  
+
   // Password change states
   const [passwordData, setPasswordData] = useState({
     current_password: '',
     new_password: '',
-    confirm_password: ''
+    confirm_password: '',
   });
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
-  
+
   const [formError, setFormError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -35,11 +35,11 @@ const Profile = () => {
         surname: currentUser.surname || '',
         email: currentUser.email || '',
         date_of_birth: currentUser.date_of_birth || '',
-        is_provisional_taxpayer: currentUser.is_provisional_taxpayer || false
+        is_provisional_taxpayer: currentUser.is_provisional_taxpayer || false,
       });
     }
   }, [currentUser]);
-  
+
   // Auto-dismiss success messages after 5 seconds
   useEffect(() => {
     if (successMessage) {
@@ -47,7 +47,7 @@ const Profile = () => {
       return () => clearTimeout(timer);
     }
   }, [successMessage]);
-  
+
   useEffect(() => {
     if (passwordSuccess) {
       const timer = setTimeout(() => setPasswordSuccess(''), 5000);
@@ -62,7 +62,7 @@ const Profile = () => {
     // Clear errors when user starts typing
     if (formError) setFormError('');
   };
-  
+
   // Password change handlers
   const handlePasswordChange = (e) => {
     setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
@@ -80,7 +80,7 @@ const Profile = () => {
           surname: currentUser.surname || '',
           email: currentUser.email || '',
           date_of_birth: currentUser.date_of_birth || '',
-          is_provisional_taxpayer: currentUser.is_provisional_taxpayer || false
+          is_provisional_taxpayer: currentUser.is_provisional_taxpayer || false,
         });
       }
       setFormError('');
@@ -88,7 +88,7 @@ const Profile = () => {
     }
     setIsEditing(!isEditing);
   };
-  
+
   // Handle password form toggle
   const handlePasswordFormToggle = () => {
     if (showPasswordForm) {
@@ -96,7 +96,7 @@ const Profile = () => {
       setPasswordData({
         current_password: '',
         new_password: '',
-        confirm_password: ''
+        confirm_password: '',
       });
       setPasswordError('');
       setPasswordSuccess('');
@@ -108,38 +108,38 @@ const Profile = () => {
     e.preventDefault();
     setFormError('');
     setSuccessMessage('');
-    
+
     // Client-side validation
     if (!formData.name?.trim() || !formData.surname?.trim()) {
       setFormError('Name and surname are required');
       return;
     }
-    
+
     if (!formData.date_of_birth) {
       setFormError('Date of birth is required');
       return;
     }
-    
+
     // Validate date of birth is in the past
     const birthDate = new Date(formData.date_of_birth);
     if (birthDate >= new Date()) {
       setFormError('Date of birth must be in the past');
       return;
     }
-    
+
     setIsUpdating(true);
-    
+
     try {
       // Prepare data for API (exclude email as it can't be changed)
       const updateData = {
         name: formData.name.trim(),
         surname: formData.surname.trim(),
         date_of_birth: formData.date_of_birth,
-        is_provisional_taxpayer: formData.is_provisional_taxpayer
+        is_provisional_taxpayer: formData.is_provisional_taxpayer,
       };
-      
+
       const result = await updateProfile(updateData);
-      
+
       if (result.success) {
         setSuccessMessage('Profile updated successfully!');
         setIsEditing(false);
@@ -157,48 +157,51 @@ const Profile = () => {
     e.preventDefault();
     setPasswordError('');
     setPasswordSuccess('');
-    
+
     // Validation
     if (passwordData.new_password !== passwordData.confirm_password) {
       setPasswordError('New passwords do not match');
       return;
     }
-    
+
     if (passwordData.new_password.length < 8) {
       setPasswordError('Password must be at least 8 characters long');
       return;
     }
-    
+
     if (!passwordData.current_password) {
       setPasswordError('Current password is required');
       return;
     }
-    
+
     setIsChangingPassword(true);
-    
+
     try {
       const passwordChangeData = {
         current_password: passwordData.current_password,
-        new_password: passwordData.new_password
+        new_password: passwordData.new_password,
       };
-      
+
       const result = await changePassword(passwordChangeData);
-      
+
       if (result.success) {
         // Reset form
         setPasswordData({
           current_password: '',
           new_password: '',
-          confirm_password: ''
+          confirm_password: '',
         });
-        
+
         setPasswordSuccess('Password changed successfully!');
         setShowPasswordForm(false);
       } else {
         setPasswordError(result.error || 'Failed to change password');
       }
     } catch (err) {
-      setPasswordError(err.message || 'Failed to change password. Please check your current password and try again.');
+      setPasswordError(
+        err.message ||
+          'Failed to change password. Please check your current password and try again.'
+      );
     } finally {
       setIsChangingPassword(false);
     }
@@ -270,7 +273,7 @@ const Profile = () => {
         <div className="bg-sc-green text-white px-6 py-4">
           <h2 className="text-lg font-semibold">Profile Information</h2>
         </div>
-        
+
         <div className="p-6">
           {/* Error Messages */}
           {formError && (
@@ -300,7 +303,7 @@ const Profile = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="surname" className="block text-sm font-medium text-gray-700 mb-1">
                     Last Name *
@@ -315,7 +318,7 @@ const Profile = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                     Email Address
@@ -329,11 +332,16 @@ const Profile = () => {
                     disabled
                     title="Email cannot be changed for security reasons"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Email cannot be changed for security reasons</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Email cannot be changed for security reasons
+                  </p>
                 </div>
-                
+
                 <div>
-                  <label htmlFor="date_of_birth" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="date_of_birth"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Date of Birth *
                   </label>
                   <input
@@ -347,7 +355,7 @@ const Profile = () => {
                     max={new Date().toISOString().split('T')[0]}
                   />
                 </div>
-                
+
                 <div className="md:col-span-2">
                   <div className="flex items-center">
                     <input
@@ -358,16 +366,19 @@ const Profile = () => {
                       checked={formData.is_provisional_taxpayer}
                       onChange={handleChange}
                     />
-                    <label htmlFor="is_provisional_taxpayer" className="ml-2 block text-sm text-gray-700">
+                    <label
+                      htmlFor="is_provisional_taxpayer"
+                      className="ml-2 block text-sm text-gray-700"
+                    >
                       I am a provisional taxpayer
                     </label>
                   </div>
                 </div>
               </div>
-              
+
               <div className="md:col-span-2 flex justify-end">
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={isUpdating}
                   className="bg-sc-green hover:bg-sc-green-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sc-green transition-colors disabled:opacity-50"
                 >
@@ -381,24 +392,26 @@ const Profile = () => {
                 <p className="text-sm font-medium text-gray-500">First Name</p>
                 <p className="text-lg font-medium text-gray-800">{formData.name}</p>
               </div>
-              
+
               <div>
                 <p className="text-sm font-medium text-gray-500">Last Name</p>
                 <p className="text-lg font-medium text-gray-800">{formData.surname}</p>
               </div>
-              
+
               <div>
                 <p className="text-sm font-medium text-gray-500">Email Address</p>
                 <p className="text-lg font-medium text-gray-800">{formData.email}</p>
               </div>
-              
+
               <div>
                 <p className="text-sm font-medium text-gray-500">Date of Birth</p>
                 <p className="text-lg font-medium text-gray-800">
-                  {formData.date_of_birth ? new Date(formData.date_of_birth).toLocaleDateString('en-ZA') : 'Not provided'}
+                  {formData.date_of_birth
+                    ? new Date(formData.date_of_birth).toLocaleDateString('en-ZA')
+                    : 'Not provided'}
                 </p>
               </div>
-              
+
               <div className="md:col-span-2">
                 <p className="text-sm font-medium text-gray-500">Provisional Taxpayer Status</p>
                 <p className="text-lg font-medium text-gray-800">
@@ -415,7 +428,7 @@ const Profile = () => {
         <div className="bg-sc-green text-white px-6 py-4">
           <h2 className="text-lg font-semibold">Account Security</h2>
         </div>
-        
+
         <div className="p-6">
           <div className="mb-4">
             <h3 className="text-lg font-medium text-gray-900 mb-2">Change Password</h3>
@@ -447,7 +460,10 @@ const Profile = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="current_password" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="current_password"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Current Password
                   </label>
                   <input
@@ -460,9 +476,12 @@ const Profile = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
-                  <label htmlFor="new_password" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="new_password"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     New Password
                   </label>
                   <input
@@ -476,9 +495,12 @@ const Profile = () => {
                     minLength={8}
                   />
                 </div>
-                
+
                 <div>
-                  <label htmlFor="confirm_password" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="confirm_password"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Confirm New Password
                   </label>
                   <input
@@ -492,7 +514,7 @@ const Profile = () => {
                     minLength={8}
                   />
                 </div>
-                
+
                 <div className="flex space-x-4">
                   <button
                     type="submit"
@@ -501,7 +523,7 @@ const Profile = () => {
                   >
                     {isChangingPassword ? 'Changing Password...' : 'Change Password'}
                   </button>
-                  <button 
+                  <button
                     type="button"
                     onClick={handlePasswordFormToggle}
                     disabled={isChangingPassword}

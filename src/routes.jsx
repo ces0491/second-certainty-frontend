@@ -19,11 +19,11 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 // Protected route component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  
+
   if (loading) {
     return <Loading fullPage />;
   }
-  
+
   return isAuthenticated ? <Layout>{children}</Layout> : <Navigate to="/login" />;
 };
 
@@ -34,16 +34,58 @@ const AppRoutes = () => {
         {/* Public routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
+
         {/* Protected routes */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/income" element={<ProtectedRoute><Income /></ProtectedRoute>} />
-        <Route path="/expenses" element={<ProtectedRoute><Expenses /></ProtectedRoute>} />
-        <Route path="/tax-calculator" element={<ProtectedRoute><TaxCalculator /></ProtectedRoute>} />
-        <Route path="/provisional-tax" element={<ProtectedRoute><ProvisionalTax /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/income"
+          element={
+            <ProtectedRoute>
+              <Income />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/expenses"
+          element={
+            <ProtectedRoute>
+              <Expenses />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tax-calculator"
+          element={
+            <ProtectedRoute>
+              <TaxCalculator />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/provisional-tax"
+          element={
+            <ProtectedRoute>
+              <ProvisionalTax />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
         {/* 404 route */}
         <Route path="*" element={<NotFound />} />
       </Routes>

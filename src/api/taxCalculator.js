@@ -25,7 +25,9 @@ export const getDeductibleExpenseTypes = async () => {
     const response = await api.get('/tax/deductible-expenses/');
     return response.data;
   } catch (error) {
-    throw error.response ? error.response.data : new Error('Failed to fetch deductible expense types');
+    throw error.response
+      ? error.response.data
+      : new Error('Failed to fetch deductible expense types');
   }
 };
 
@@ -70,7 +72,11 @@ export const calculateProvisionalTax = async (userId, taxYear) => {
 export const calculateCustomTax = async (userId, calculationData) => {
   try {
     const params = calculationData.tax_year ? { tax_year: calculationData.tax_year } : {};
-    const response = await api.post(`/tax/users/${userId}/custom-tax-calculation/`, calculationData, { params });
+    const response = await api.post(
+      `/tax/users/${userId}/custom-tax-calculation/`,
+      calculationData,
+      { params }
+    );
     return response.data;
   } catch (error) {
     throw error.response ? error.response.data : new Error('Failed to calculate tax');

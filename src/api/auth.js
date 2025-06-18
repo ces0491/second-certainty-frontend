@@ -53,16 +53,16 @@ export const login = async (email, password) => {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
     });
-    
+
     const { access_token } = response.data;
-    
+
     // Store token
     localStorage.setItem('auth_token', access_token);
-    
+
     // Get user data after successful login
     const userResponse = await api.get('/auth/me');
     localStorage.setItem('user_data', JSON.stringify(userResponse.data));
-    
+
     return { user: userResponse.data, access_token };
   } catch (error) {
     console.error('Login error:', error);

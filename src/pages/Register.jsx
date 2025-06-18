@@ -11,7 +11,7 @@ const Register = () => {
     name: '',
     surname: '',
     date_of_birth: '',
-    is_provisional_taxpayer: false
+    is_provisional_taxpayer: false,
   });
   const [formError, setFormError] = useState('');
   const { register, loading } = useContext(AuthContext);
@@ -66,18 +66,18 @@ const Register = () => {
     const birthYear = birthDate.getFullYear();
     const birthMonth = birthDate.getMonth();
     const birthDay = birthDate.getDate();
-    
+
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth();
     const currentDay = today.getDate();
-    
+
     let age = currentYear - birthYear;
-    
+
     // Adjust age if birthday hasn't occurred this year
     if (currentMonth < birthMonth || (currentMonth === birthMonth && currentDay < birthDay)) {
       age--;
     }
-    
+
     if (age < 16) {
       setFormError('You must be at least 16 years old to register');
       return false;
@@ -96,7 +96,7 @@ const Register = () => {
 
     // Remove confirmPassword and prepare data for API
     const { confirmPassword, ...apiData } = formData;
-    
+
     // Ensure names are trimmed
     apiData.name = apiData.name.trim();
     apiData.surname = apiData.surname.trim();
@@ -104,21 +104,21 @@ const Register = () => {
 
     try {
       console.log('Submitting registration:', { ...apiData, password: '[HIDDEN]' });
-      
+
       const result = await register(apiData);
-      
+
       if (result.success) {
         console.log('Registration successful');
         // Redirect to login page after successful registration
-        navigate('/login', { 
-          state: { 
-            message: 'Registration successful! Please log in with your new account.' 
-          } 
+        navigate('/login', {
+          state: {
+            message: 'Registration successful! Please log in with your new account.',
+          },
         });
       } else {
         // Handle specific error messages
         let errorMessage = 'Registration failed. Please try again.';
-        
+
         if (result.error) {
           if (typeof result.error === 'string') {
             errorMessage = result.error;
@@ -128,15 +128,15 @@ const Register = () => {
             errorMessage = result.error.message;
           }
         }
-        
+
         setFormError(errorMessage);
       }
     } catch (err) {
       console.error('Registration error:', err);
-      
+
       // Handle different types of errors
       let errorMessage = 'An unexpected error occurred. Please try again.';
-      
+
       if (err.response) {
         // Server responded with error status
         if (err.response.status === 400) {
@@ -152,11 +152,12 @@ const Register = () => {
         }
       } else if (err.request) {
         // Network error
-        errorMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
+        errorMessage =
+          'Unable to connect to the server. Please check your internet connection and try again.';
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       setFormError(errorMessage);
     }
   };
@@ -172,18 +173,23 @@ const Register = () => {
             Join Second Certainty to manage your tax liabilities
           </p>
         </div>
-        
+
         {formError && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <div
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+            role="alert"
+          >
             <strong className="font-bold">Error: </strong>
             <span className="block sm:inline">{formError}</span>
           </div>
         )}
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email" className="sr-only">Email address</label>
+              <label htmlFor="email" className="sr-only">
+                Email address
+              </label>
               <input
                 id="email"
                 name="email"
@@ -197,7 +203,9 @@ const Register = () => {
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">Password</label>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
               <input
                 id="password"
                 name="password"
@@ -211,7 +219,9 @@ const Register = () => {
               />
             </div>
             <div>
-              <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
+              <label htmlFor="confirmPassword" className="sr-only">
+                Confirm Password
+              </label>
               <input
                 id="confirmPassword"
                 name="confirmPassword"
@@ -225,7 +235,9 @@ const Register = () => {
               />
             </div>
             <div>
-              <label htmlFor="name" className="sr-only">First Name</label>
+              <label htmlFor="name" className="sr-only">
+                First Name
+              </label>
               <input
                 id="name"
                 name="name"
@@ -239,7 +251,9 @@ const Register = () => {
               />
             </div>
             <div>
-              <label htmlFor="surname" className="sr-only">Last Name</label>
+              <label htmlFor="surname" className="sr-only">
+                Last Name
+              </label>
               <input
                 id="surname"
                 name="surname"
@@ -253,7 +267,9 @@ const Register = () => {
               />
             </div>
             <div>
-              <label htmlFor="date_of_birth" className="sr-only">Date of Birth</label>
+              <label htmlFor="date_of_birth" className="sr-only">
+                Date of Birth
+              </label>
               <input
                 id="date_of_birth"
                 name="date_of_birth"
@@ -290,7 +306,7 @@ const Register = () => {
               {loading ? 'Creating account...' : 'Register'}
             </button>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div className="text-sm">
               <Link to="/login" className="font-medium text-sc-green-600 hover:text-sc-green-500">

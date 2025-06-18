@@ -1,5 +1,5 @@
 // src/components/income/IncomeList.jsx
-import React, { useState } from 'react';  // Remove useEffect if not needed
+import React, { useState } from 'react'; // Remove useEffect if not needed
 import { useIncome } from '../../hooks/useIncome';
 import Loading from '../common/Loading';
 import Alert from '../common/Alert';
@@ -12,44 +12,44 @@ const INCOME_SOURCE_TYPES = [
   'Dividends',
   'Business Income',
   'Capital Gains',
-  'Other'
+  'Other',
 ];
 
 const IncomeManagement = () => {
-  const { 
-    incomes, 
-    loading, 
-    error, 
-    currentTaxYear, 
+  const {
+    incomes,
+    loading,
+    error,
+    currentTaxYear,
     changeTaxYear,
     addIncome: addIncomeItem,
-    deleteIncome: deleteIncomeItem
+    deleteIncome: deleteIncomeItem,
   } = useIncome();
-  
+
   const [isAddingIncome, setIsAddingIncome] = useState(false);
   const [formError, setFormError] = useState('');
-  
+
   // New income form state
   const [newIncome, setNewIncome] = useState({
     source_type: '',
     description: '',
     annual_amount: '',
     is_paye: false,
-    tax_year: currentTaxYear
+    tax_year: currentTaxYear,
   });
-  
+
   // Available tax years
   const TAX_YEARS = ['2025-2026', '2024-2025', '2023-2024', '2022-2023'];
-  
+
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setNewIncome({
       ...newIncome,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     });
   };
-  
+
   // Handle form submission
   const handleAddIncome = async () => {
     // Validate form
@@ -57,16 +57,16 @@ const IncomeManagement = () => {
       setFormError('Please fill in all required fields.');
       return;
     }
-    
+
     try {
       // Convert annual_amount to number
       const incomeData = {
         ...newIncome,
-        annual_amount: Number(newIncome.annual_amount)
+        annual_amount: Number(newIncome.annual_amount),
       };
-      
+
       const result = await addIncomeItem(incomeData);
-      
+
       if (result.success) {
         // Reset form
         setNewIncome({
@@ -74,9 +74,9 @@ const IncomeManagement = () => {
           description: '',
           annual_amount: '',
           is_paye: false,
-          tax_year: currentTaxYear
+          tax_year: currentTaxYear,
         });
-        
+
         // Close form
         setIsAddingIncome(false);
         setFormError('');
@@ -88,13 +88,13 @@ const IncomeManagement = () => {
       setFormError(err.message || 'Failed to add income. Please try again.');
     }
   };
-  
+
   // Handle income deletion
   const handleDeleteIncome = async (id) => {
     if (!window.confirm('Are you sure you want to delete this income source?')) {
       return;
     }
-    
+
     try {
       await deleteIncomeItem(id);
     } catch (err) {
@@ -102,31 +102,31 @@ const IncomeManagement = () => {
       setFormError(err.message || 'Failed to delete income. Please try again.');
     }
   };
-  
+
   // Format currency
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-ZA', { 
-      style: 'currency', 
+    return new Intl.NumberFormat('en-ZA', {
+      style: 'currency',
       currency: 'ZAR',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0 
+      maximumFractionDigits: 0,
     }).format(value);
   };
-  
+
   // Calculate total income
   const totalIncome = incomes.reduce((sum, income) => sum + income.annual_amount, 0);
-  
+
   // Handle tax year change
   const handleTaxYearChange = (e) => {
     changeTaxYear(e.target.value);
-    
+
     // Update new income form tax year
     setNewIncome({
       ...newIncome,
-      tax_year: e.target.value
+      tax_year: e.target.value,
     });
   };
-  
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
@@ -138,7 +138,9 @@ const IncomeManagement = () => {
             onChange={handleTaxYearChange}
           >
             {TAX_YEARS.map((year) => (
-              <option key={year} value={year}>{year}</option>
+              <option key={year} value={year}>
+                {year}
+              </option>
             ))}
           </select>
           <button
@@ -149,11 +151,11 @@ const IncomeManagement = () => {
           </button>
         </div>
       </div>
-      
+
       {(error || formError) && (
         <Alert type="error" message={error || formError} onDismiss={() => setFormError('')} />
       )}
-      
+
       {/* Add Income Panel */}
       {isAddingIncome && (
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -172,13 +174,18 @@ const IncomeManagement = () => {
               >
                 <option value="">Select Income Type</option>
                 {INCOME_SOURCE_TYPES.map((type) => (
-                  <option key={type} value={type}>{type}</option>
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
                 ))}
               </select>
             </div>
-            
+
             <div>
-              <label htmlFor="annual_amount" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="annual_amount"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Annual Amount (ZAR) *
               </label>
               <input
@@ -192,7 +199,7 @@ const IncomeManagement = () => {
                 min="0"
               />
             </div>
-            
+
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                 Description
@@ -207,7 +214,7 @@ const IncomeManagement = () => {
                 onChange={handleInputChange}
               />
             </div>
-            
+
             <div>
               <label htmlFor="tax_year" className="block text-sm font-medium text-gray-700 mb-1">
                 Tax Year *
@@ -220,11 +227,13 @@ const IncomeManagement = () => {
                 onChange={handleInputChange}
               >
                 {TAX_YEARS.map((year) => (
-                  <option key={year} value={year}>{year}</option>
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
                 ))}
               </select>
             </div>
-            
+
             <div className="flex items-center h-full mt-6">
               <input
                 id="is_paye"
@@ -238,7 +247,7 @@ const IncomeManagement = () => {
                 PAYE is deducted from this income
               </label>
             </div>
-            
+
             <div className="flex items-center justify-end h-full mt-6">
               <button
                 onClick={handleAddIncome}
@@ -251,7 +260,7 @@ const IncomeManagement = () => {
           </div>
         </div>
       )}
-      
+
       {/* Income Summary Card */}
       <div className="bg-sc-green-50 rounded-lg shadow p-6 mb-6">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center">
@@ -265,20 +274,22 @@ const IncomeManagement = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Income List */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-medium text-gray-800">Income Sources</h2>
         </div>
-        
+
         {loading ? (
           <div className="flex justify-center items-center p-8">
             <Loading />
           </div>
         ) : incomes.length === 0 ? (
           <div className="p-6 text-center">
-            <p className="text-gray-500">No income sources found. Add your first income source to get started.</p>
+            <p className="text-gray-500">
+              No income sources found. Add your first income source to get started.
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">

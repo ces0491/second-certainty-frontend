@@ -14,19 +14,20 @@ const safeNumber = (value) => {
 
 const ProvisionalTax = () => {
   const { currentUser } = useAuth();
-  const { provisionalTax, loading, error, fetchProvisionalTax, currentTaxYear, changeTaxYear } = useTaxCalc();
+  const { provisionalTax, loading, error, fetchProvisionalTax, currentTaxYear, changeTaxYear } =
+    useTaxCalc();
   const [showInfo, setShowInfo] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [lastError, setLastError] = useState('');
-  
+
   // Available tax years
   const TAX_YEARS = ['2025-2026', '2024-2025', '2023-2024', '2022-2023'];
-  
+
   // Handle tax year change
   const handleTaxYearChange = (e) => {
     changeTaxYear(e.target.value);
   };
-  
+
   // Manual refresh function with useCallback
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -42,69 +43,74 @@ const ProvisionalTax = () => {
       setRefreshing(false);
     }
   }, [fetchProvisionalTax]);
-  
+
   useEffect(() => {
     if (currentUser?.is_provisional_taxpayer) {
-      console.log('Fetching provisional tax for user:', currentUser.id, 'tax year:', currentTaxYear);
+      console.log(
+        'Fetching provisional tax for user:',
+        currentUser.id,
+        'tax year:',
+        currentTaxYear
+      );
       fetchProvisionalTax();
     }
   }, [currentTaxYear, currentUser, fetchProvisionalTax]);
-  
+
   if (!currentUser?.is_provisional_taxpayer) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <Alert 
-          type="info" 
+        <Alert
+          type="info"
           message="This section is only for provisional taxpayers. Please update your profile if you are a provisional taxpayer."
         />
       </div>
     );
   }
-  
+
   if (loading && !refreshing) {
     return <Loading />;
   }
-  
+
   // Helper function to safely extract payment data
   const getPaymentData = (payment) => {
     if (!payment) return { amount: 0, due_date: null };
-    
+
     // Handle new structure: { amount: number, due_date: string }
     if (typeof payment === 'object' && payment.amount !== undefined) {
       return {
         amount: safeNumber(payment.amount),
-        due_date: payment.due_date
+        due_date: payment.due_date,
       };
     }
-    
+
     // Handle old structure: just a number
     if (typeof payment === 'number') {
       return {
         amount: safeNumber(payment),
-        due_date: null
+        due_date: null,
       };
     }
-    
+
     return { amount: 0, due_date: null };
   };
-  
+
   // Calculate due dates
   const calculateDueDates = (taxYear) => {
     const yearParts = taxYear.split('-');
     const startYear = parseInt(yearParts[0]);
     const endYear = parseInt(yearParts[1]);
-    
+
     return {
       first_due_date: `${startYear}-08-31`,
-      second_due_date: `${endYear}-02-28`
+      second_due_date: `${endYear}-02-28`,
     };
   };
-  
+
   // Extract payment data safely with fallback due dates
   const dueDates = calculateDueDates(currentTaxYear);
   const firstPayment = getPaymentData(provisionalTax?.first_payment);
   const secondPayment = getPaymentData(provisionalTax?.second_payment);
-  
+
   // Use calculated due dates if not provided
   if (!firstPayment.due_date) {
     firstPayment.due_date = dueDates.first_due_date;
@@ -112,12 +118,12 @@ const ProvisionalTax = () => {
   if (!secondPayment.due_date) {
     secondPayment.due_date = dueDates.second_due_date;
   }
-  
+
   // Get total tax - handle both 'total_tax' and 'annual_tax' properties
   const totalTax = safeNumber(provisionalTax?.total_tax || provisionalTax?.annual_tax || 0);
   const taxableIncome = safeNumber(provisionalTax?.taxable_income || 0);
   const effectiveRate = safeNumber(provisionalTax?.effective_tax_rate || 0);
-  
+
   // Debug logging
   console.log('ProvisionalTax Debug:', {
     provisionalTax,
@@ -127,9 +133,9 @@ const ProvisionalTax = () => {
     firstPayment,
     secondPayment,
     error,
-    lastError
+    lastError,
   });
-  
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
@@ -141,7 +147,9 @@ const ProvisionalTax = () => {
             onChange={handleTaxYearChange}
           >
             {TAX_YEARS.map((year) => (
-              <option key={year} value={year}>{year}</option>
+              <option key={year} value={year}>
+                {year}
+              </option>
             ))}
           </select>
           <button
@@ -152,17 +160,18 @@ const ProvisionalTax = () => {
           </button>
         </div>
       </div>
-      
+
       {/* Show errors */}
       {(error || lastError) && (
         <Alert type="error" message={error || lastError} onDismiss={() => setLastError('')} />
       )}
-      
+
       {showInfo && (
         <div className="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 mb-6" role="alert">
           <h2 className="font-bold mb-2">About Provisional Tax</h2>
           <p className="mb-2">
-            Provisional tax is a method of paying income tax in advance, based on estimated taxable income for the current tax year.
+            Provisional tax is a method of paying income tax in advance, based on estimated taxable
+            income for the current tax year.
           </p>
           <p className="mb-2">
             As a provisional taxpayer, you are required to make two payments in a tax year:
@@ -172,15 +181,16 @@ const ProvisionalTax = () => {
             <li>Second payment: Due by the end of February (at the end of the tax year)</li>
           </ul>
           <p>
-            Each payment is typically 50% of your estimated annual tax liability. This tool helps you calculate those amounts based on your current income and expense data.
+            Each payment is typically 50% of your estimated annual tax liability. This tool helps
+            you calculate those amounts based on your current income and expense data.
           </p>
         </div>
       )}
-      
+
       {/* Refresh Button */}
       <div className="mb-6">
-        <button 
-          onClick={handleRefresh} 
+        <button
+          onClick={handleRefresh}
           disabled={refreshing || loading}
           className="bg-sc-green hover:bg-sc-green-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sc-green transition-colors disabled:opacity-50"
         >
@@ -190,7 +200,7 @@ const ProvisionalTax = () => {
           Click to recalculate your provisional tax based on current income and expense data.
         </p>
       </div>
-      
+
       {/* Always show the cards, even if data is zero */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* First Payment Card */}
@@ -203,9 +213,7 @@ const ProvisionalTax = () => {
               <div>
                 <p className="text-sm text-gray-600">Due Date</p>
                 <p className="text-lg font-semibold text-gray-800">
-                  {firstPayment.due_date 
-                    ? formatDate(firstPayment.due_date)
-                    : 'August 31, 2025'}
+                  {firstPayment.due_date ? formatDate(firstPayment.due_date) : 'August 31, 2025'}
                 </p>
               </div>
               <div className="text-right">
@@ -222,18 +230,22 @@ const ProvisionalTax = () => {
               </p>
               {firstPayment.amount === 0 && (
                 <div className="mt-2 bg-yellow-100 text-yellow-800 p-2 rounded">
-                  <p className="text-sm">No payment required - your income may be below the tax threshold.</p>
+                  <p className="text-sm">
+                    No payment required - your income may be below the tax threshold.
+                  </p>
                 </div>
               )}
-              {firstPayment.due_date && new Date(firstPayment.due_date) < new Date() && firstPayment.amount > 0 && (
-                <div className="mt-2 bg-red-100 text-red-600 p-2 rounded">
-                  <p className="text-sm font-medium">This payment is now overdue.</p>
-                </div>
-              )}
+              {firstPayment.due_date &&
+                new Date(firstPayment.due_date) < new Date() &&
+                firstPayment.amount > 0 && (
+                  <div className="mt-2 bg-red-100 text-red-600 p-2 rounded">
+                    <p className="text-sm font-medium">This payment is now overdue.</p>
+                  </div>
+                )}
             </div>
           </div>
         </div>
-        
+
         {/* Second Payment Card */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="px-6 py-4 bg-sc-green-600">
@@ -244,7 +256,7 @@ const ProvisionalTax = () => {
               <div>
                 <p className="text-sm text-gray-600">Due Date</p>
                 <p className="text-lg font-semibold text-gray-800">
-                  {secondPayment.due_date 
+                  {secondPayment.due_date
                     ? formatDate(secondPayment.due_date)
                     : 'February 28, 2026'}
                 </p>
@@ -263,18 +275,22 @@ const ProvisionalTax = () => {
               </p>
               {secondPayment.amount === 0 && (
                 <div className="mt-2 bg-yellow-100 text-yellow-800 p-2 rounded">
-                  <p className="text-sm">No payment required - your income may be below the tax threshold.</p>
+                  <p className="text-sm">
+                    No payment required - your income may be below the tax threshold.
+                  </p>
                 </div>
               )}
-              {secondPayment.due_date && new Date(secondPayment.due_date) < new Date() && secondPayment.amount > 0 && (
-                <div className="mt-2 bg-red-100 text-red-600 p-2 rounded">
-                  <p className="text-sm font-medium">This payment is now overdue.</p>
-                </div>
-              )}
+              {secondPayment.due_date &&
+                new Date(secondPayment.due_date) < new Date() &&
+                secondPayment.amount > 0 && (
+                  <div className="mt-2 bg-red-100 text-red-600 p-2 rounded">
+                    <p className="text-sm font-medium">This payment is now overdue.</p>
+                  </div>
+                )}
             </div>
           </div>
         </div>
-        
+
         {/* Tax Summary Card */}
         <div className="md:col-span-2 bg-white rounded-lg shadow-md overflow-hidden">
           <div className="px-6 py-4 bg-sc-green-600">
@@ -284,15 +300,11 @@ const ProvisionalTax = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <p className="text-sm text-gray-600">Total Annual Tax</p>
-                <p className="text-xl font-bold text-gray-800">
-                  {formatCurrency(totalTax)}
-                </p>
+                <p className="text-xl font-bold text-gray-800">{formatCurrency(totalTax)}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Taxable Income</p>
-                <p className="text-xl font-bold text-gray-800">
-                  {formatCurrency(taxableIncome)}
-                </p>
+                <p className="text-xl font-bold text-gray-800">{formatCurrency(taxableIncome)}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Effective Tax Rate</p>
@@ -301,10 +313,13 @@ const ProvisionalTax = () => {
                 </p>
               </div>
             </div>
-            
+
             {/* Show help information if calculations show zero */}
             {totalTax === 0 && taxableIncome === 0 && (
-              <div className="mt-6 bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
+              <div
+                className="mt-6 bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4"
+                role="alert"
+              >
                 <p className="font-bold">No Tax Calculation Available</p>
                 <p>Your provisional tax shows zero because:</p>
                 <ul className="list-disc pl-5 mt-2">
@@ -313,18 +328,26 @@ const ProvisionalTax = () => {
                   <li>There may be an issue with the tax calculation</li>
                 </ul>
                 <p className="mt-2">
-                  <strong>Solution:</strong> Add income sources for {currentTaxYear} on the Income page, 
-                  then refresh this calculation.
+                  <strong>Solution:</strong> Add income sources for {currentTaxYear} on the Income
+                  page, then refresh this calculation.
                 </p>
               </div>
             )}
-            
+
             {totalTax > 0 && (
-              <div className="mt-6 bg-green-50 border-l-4 border-green-500 text-green-700 p-4" role="alert">
+              <div
+                className="mt-6 bg-green-50 border-l-4 border-green-500 text-green-700 p-4"
+                role="alert"
+              >
                 <p className="font-bold">✅ Tax Calculation Complete</p>
-                <p>Your provisional tax has been calculated based on your current income and expense data.</p>
+                <p>
+                  Your provisional tax has been calculated based on your current income and expense
+                  data.
+                </p>
                 <div className="mt-2 text-sm">
-                  <p><strong>Next Steps:</strong></p>
+                  <p>
+                    <strong>Next Steps:</strong>
+                  </p>
                   <ul className="list-disc pl-5">
                     <li>Make your first payment by {formatDate(firstPayment.due_date)}</li>
                     <li>Make your second payment by {formatDate(secondPayment.due_date)}</li>
@@ -333,12 +356,10 @@ const ProvisionalTax = () => {
                 </div>
               </div>
             )}
-            
+
             <div className="mt-6">
               <h3 className="text-md font-medium text-gray-800 mb-2">Payment Methods</h3>
-              <p className="text-sm text-gray-600">
-                Provisional tax payments can be made through:
-              </p>
+              <p className="text-sm text-gray-600">Provisional tax payments can be made through:</p>
               <ul className="list-disc pl-5 text-sm text-gray-600 mt-2">
                 <li>eFiling on the SARS website</li>
                 <li>Electronic Funds Transfer (EFT) to SARS</li>

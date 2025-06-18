@@ -7,7 +7,7 @@ describe('formatCurrency', () => {
     expect(formatCurrency(1234.56, 2)).toBe('R 1,234.56');
     expect(formatCurrency(0)).toBe('R 0');
   });
-  
+
   it('handles negative numbers', () => {
     expect(formatCurrency(-1000)).toBe('-R 1,000');
   });

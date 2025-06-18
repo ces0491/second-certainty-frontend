@@ -6,17 +6,30 @@
 /* Custom styles */
 :root {
   --sc-green: #006837;
-  --sc-gold: #F7B917;
-  --sc-black: #231F20;
+  --sc-gold: #f7b917;
+  --sc-black: #231f20;
 }
 
 body {
   @apply bg-gray-100 text-gray-900;
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
-    'Helvetica Neue', Arial, sans-serif;
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   @apply font-medium text-gray-900;
 }
 

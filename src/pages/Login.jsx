@@ -37,22 +37,22 @@ const Login = () => {
 
     try {
       console.log('Submitting login form for:', email);
-    
+
       // Show message for potential cold start
       if (!isWakingUp) {
         setIsWakingUp(true);
         setTimeout(() => setIsWakingUp(false), 15000); // Show for 15 seconds
       }
-    
+
       const result = await login(email.trim(), password);
-    
+
       if (result.success) {
         console.log('Login successful, navigating to dashboard');
         navigate('/dashboard');
       } else {
         // Handle specific error messages
         let errorMessage = 'Login failed. Please check your credentials.';
-        
+
         if (result.error) {
           if (typeof result.error === 'string') {
             errorMessage = result.error;
@@ -62,15 +62,15 @@ const Login = () => {
             errorMessage = result.error.message;
           }
         }
-        
+
         setFormError(errorMessage);
       }
     } catch (err) {
       console.error('Login error in component:', err);
-      
+
       // Handle different types of errors
       let errorMessage = 'An unexpected error occurred. Please try again.';
-      
+
       if (err.response) {
         // Server responded with error status
         if (err.response.status === 401) {
@@ -84,11 +84,12 @@ const Login = () => {
         }
       } else if (err.request) {
         // Network error
-        errorMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
+        errorMessage =
+          'Unable to connect to the server. Please check your internet connection and try again.';
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       setFormError(errorMessage);
     } finally {
       setIsWakingUp(false);
@@ -103,26 +104,33 @@ const Login = () => {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-sc-black">
             Sign in to Second Certainty
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Your tax management solution
-          </p>
+          <p className="mt-2 text-center text-sm text-gray-600">Your tax management solution</p>
         </div>
-        
+
         {message && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+          <div
+            className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
+            role="alert"
+          >
             <span className="block sm:inline">{message}</span>
           </div>
         )}
-        
+
         {formError && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <div
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+            role="alert"
+          >
             <strong className="font-bold">Error: </strong>
             <span className="block sm:inline">{formError}</span>
           </div>
         )}
-        
+
         {isWakingUp && (
-          <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative" role="alert">
+          <div
+            className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative"
+            role="alert"
+          >
             <span className="block sm:inline">
               🔄 Server is starting up (this may take up to 60 seconds on first visit)...
             </span>
@@ -132,7 +140,9 @@ const Login = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email-address" className="sr-only">Email address</label>
+              <label htmlFor="email-address" className="sr-only">
+                Email address
+              </label>
               <input
                 id="email-address"
                 name="email"
@@ -146,7 +156,9 @@ const Login = () => {
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">Password</label>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
               <input
                 id="password"
                 name="password"
@@ -170,7 +182,7 @@ const Login = () => {
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div className="text-sm">
               <Link to="/register" className="font-medium text-sc-green hover:text-sc-green/80">

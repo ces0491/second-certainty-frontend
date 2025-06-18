@@ -6,19 +6,19 @@ import Alert from '../components/common/Alert';
 import { formatCurrency } from '../utils/formatters';
 
 const Expenses = () => {
-  const { 
-    expenses, 
-    expenseTypes, 
-    loading, 
-    error, 
-    currentTaxYear, 
-    changeTaxYear, 
-    addExpense: addExpenseItem, 
+  const {
+    expenses,
+    expenseTypes,
+    loading,
+    error,
+    currentTaxYear,
+    changeTaxYear,
+    addExpense: addExpenseItem,
     deleteExpense: deleteExpenseItem,
     fetchExpenses,
-    fetchExpenseTypes
+    fetchExpenseTypes,
   } = useExpenses();
-  
+
   const [isAddingExpense, setIsAddingExpense] = useState(false);
   const [formError, setFormError] = useState('');
   const [newExpense, setNewExpense] = useState({
@@ -26,26 +26,26 @@ const Expenses = () => {
     description: '',
     amount: '',
   });
-  
+
   // Available tax years
   const TAX_YEARS = ['2025-2026', '2024-2025', '2023-2024', '2022-2023'];
-  
+
   // Ensure expense types are loaded
   useEffect(() => {
     if (expenseTypes.length === 0) {
       fetchExpenseTypes();
     }
   }, [expenseTypes.length, fetchExpenseTypes]);
-  
+
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewExpense(prev => ({
+    setNewExpense((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
-  
+
   // Handle form submission
   const handleAddExpense = async () => {
     // Validate form
@@ -53,18 +53,18 @@ const Expenses = () => {
       setFormError('Please fill in all required fields.');
       return;
     }
-    
+
     try {
       // Parse number values
       const expenseData = {
         expense_type_id: parseInt(newExpense.expense_type_id),
         description: newExpense.description || '',
         amount: Number(newExpense.amount),
-        tax_year: currentTaxYear
+        tax_year: currentTaxYear,
       };
-      
+
       const result = await addExpenseItem(expenseData);
-      
+
       if (result.success) {
         // Reset form
         setNewExpense({
@@ -72,11 +72,11 @@ const Expenses = () => {
           description: '',
           amount: '',
         });
-        
+
         // Close form
         setIsAddingExpense(false);
         setFormError('');
-        
+
         // Refresh expenses
         fetchExpenses();
       } else {
@@ -86,16 +86,16 @@ const Expenses = () => {
       setFormError(err.message || 'An unexpected error occurred. Please try again.');
     }
   };
-  
+
   // Handle expense deletion
   const handleDeleteExpense = async (id) => {
     if (!window.confirm('Are you sure you want to delete this expense?')) {
       return;
     }
-    
+
     try {
       const result = await deleteExpenseItem(id);
-      
+
       if (!result.success) {
         setFormError(result.error || 'Failed to delete expense.');
       }
@@ -103,27 +103,27 @@ const Expenses = () => {
       setFormError(err.message || 'An unexpected error occurred. Please try again.');
     }
   };
-  
+
   // Calculate total expenses
   const totalExpenses = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
-  
+
   // Handle tax year change
   const handleTaxYearChange = (e) => {
     changeTaxYear(e.target.value);
   };
-  
+
   // Get expense type name helper
   const getExpenseTypeName = (expense) => {
     if (expense.expense_type && expense.expense_type.name) {
       return expense.expense_type.name;
     }
-    
+
     // Look up expense type from our expense types array
-    const expenseType = expenseTypes.find(type => type.id === expense.expense_type_id);
+    const expenseType = expenseTypes.find((type) => type.id === expense.expense_type_id);
     if (expenseType) {
       return expenseType.name;
     }
-    
+
     return 'Unknown';
   };
 
@@ -138,7 +138,9 @@ const Expenses = () => {
             onChange={handleTaxYearChange}
           >
             {TAX_YEARS.map((year) => (
-              <option key={year} value={year}>{year}</option>
+              <option key={year} value={year}>
+                {year}
+              </option>
             ))}
           </select>
           <button
@@ -149,18 +151,21 @@ const Expenses = () => {
           </button>
         </div>
       </div>
-      
+
       {(error || formError) && (
         <Alert type="error" message={error || formError} onDismiss={() => setFormError('')} />
       )}
-      
+
       {/* Add Expense Panel */}
       {isAddingExpense && (
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-xl font-medium text-gray-800 mb-4">Add New Expense</h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
-              <label htmlFor="expense_type_id" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="expense_type_id"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Expense Type *
               </label>
               <select
@@ -182,7 +187,7 @@ const Expenses = () => {
                 )}
               </select>
             </div>
-            
+
             <div>
               <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
                 Amount (ZAR) *
@@ -198,7 +203,7 @@ const Expenses = () => {
                 min="0"
               />
             </div>
-            
+
             <div className="md:col-span-2">
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                 Description
@@ -213,7 +218,7 @@ const Expenses = () => {
                 onChange={handleInputChange}
               />
             </div>
-            
+
             <div className="md:col-span-2 flex justify-end">
               <button
                 onClick={handleAddExpense}
@@ -226,7 +231,7 @@ const Expenses = () => {
           </div>
         </div>
       )}
-      
+
       {/* Expense Summary Card */}
       <div className="bg-sc-green-50 rounded-lg shadow p-6 mb-6">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center">
@@ -240,20 +245,22 @@ const Expenses = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Expense List */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-medium text-gray-800">Expenses</h2>
         </div>
-        
+
         {loading ? (
           <div className="flex justify-center items-center p-8">
             <Loading />
           </div>
         ) : expenses.length === 0 ? (
           <div className="p-6 text-center">
-            <p className="text-gray-500">No expenses found. Add your first expense to get started.</p>
+            <p className="text-gray-500">
+              No expenses found. Add your first expense to get started.
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">

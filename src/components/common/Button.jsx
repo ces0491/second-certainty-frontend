@@ -7,25 +7,25 @@ const VARIANTS = {
   secondary: 'bg-white text-sc-green border border-sc-green hover:bg-sc-green/10',
   accent: 'bg-sc-gold hover:bg-sc-gold/80 text-sc-black',
   danger: 'bg-red-600 hover:bg-red-700 text-white',
-  gray: 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+  gray: 'bg-gray-200 hover:bg-gray-300 text-gray-700',
 };
 
 // Button sizes
 const SIZES = {
   sm: 'py-1 px-2 text-sm',
   md: 'py-2 px-4',
-  lg: 'py-3 px-6 text-lg'
+  lg: 'py-3 px-6 text-lg',
 };
 
-const Button = ({ 
-  children, 
-  variant = 'primary', 
-  size = 'md', 
-  className = '', 
+const Button = ({
+  children,
+  variant = 'primary',
+  size = 'md',
+  className = '',
   type = 'button',
   disabled = false,
   onClick,
-  ...props 
+  ...props
 }) => {
   return (
     <button

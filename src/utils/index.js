@@ -5,14 +5,14 @@
 export { formatCurrency, formatDate, formatPercentage } from './formatters';
 
 // Validators
-export { 
-  isValidEmail, 
-  isRequired, 
-  minLength, 
-  isNumber, 
+export {
+  isValidEmail,
+  isRequired,
+  minLength,
+  isNumber,
   isPositiveNumber,
-  isPastDate, 
-  passwordsMatch 
+  isPastDate,
+  passwordsMatch,
 } from './validators';
 
 // Tax utilities
@@ -20,5 +20,5 @@ export {
   calculateTaxFromBrackets,
   calculateEffectiveTaxRate,
   calculateMonthlyTax,
-  calculateProvisionalPayments
+  calculateProvisionalPayments,
 } from './taxUtils';

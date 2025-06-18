@@ -22,7 +22,7 @@ const Navbar = () => {
               </Link>
             </div>
           </div>
-          
+
           {currentUser && (
             <div className="flex items-center">
               <div className="hidden md:ml-4 md:flex md:items-center">
@@ -36,9 +36,7 @@ const Navbar = () => {
                     <span className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-white">
                       {currentUser.name[0]}
                     </span>
-                    <span className="ml-2 text-white">
-                      {currentUser.name}
-                    </span>
+                    <span className="ml-2 text-white">{currentUser.name}</span>
                   </button>
                 </div>
                 <button

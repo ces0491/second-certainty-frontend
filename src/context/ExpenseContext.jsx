@@ -28,10 +28,10 @@ export const ExpenseProvider = ({ children }) => {
   // Fetch expenses for current user and tax year
   const fetchExpenses = useCallback(async () => {
     if (!currentUser) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       const data = await getExpenses(currentUser.id, currentTaxYear);
       setExpenses(Array.isArray(data) ? data : []);
@@ -57,48 +57,54 @@ export const ExpenseProvider = ({ children }) => {
   }, [currentUser, currentTaxYear, fetchExpenses]);
 
   // Add new expense
-  const addExpenseItem = useCallback(async (expenseData) => {
-    if (!currentUser) return { success: false, error: 'Authentication required' };
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const newExpense = await addExpense(currentUser.id, {
-        ...expenseData,
-        tax_year: currentTaxYear
-      });
-      
-      setExpenses(prev => [...prev, newExpense]);
-      return { success: true, data: newExpense };
-    } catch (err) {
-      console.error('Error adding expense:', err);
-      setError(err.message || 'Failed to add expense');
-      return { success: false, error: err.message || 'Failed to add expense' };
-    } finally {
-      setLoading(false);
-    }
-  }, [currentUser, currentTaxYear]);
+  const addExpenseItem = useCallback(
+    async (expenseData) => {
+      if (!currentUser) return { success: false, error: 'Authentication required' };
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const newExpense = await addExpense(currentUser.id, {
+          ...expenseData,
+          tax_year: currentTaxYear,
+        });
+
+        setExpenses((prev) => [...prev, newExpense]);
+        return { success: true, data: newExpense };
+      } catch (err) {
+        console.error('Error adding expense:', err);
+        setError(err.message || 'Failed to add expense');
+        return { success: false, error: err.message || 'Failed to add expense' };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [currentUser, currentTaxYear]
+  );
 
   // Delete expense
-  const deleteExpenseItem = useCallback(async (expenseId) => {
-    if (!currentUser) return { success: false, error: 'Authentication required' };
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      await deleteExpense(currentUser.id, expenseId);
-      setExpenses(prev => prev.filter(expense => expense.id !== expenseId));
-      return { success: true };
-    } catch (err) {
-      console.error('Error deleting expense:', err);
-      setError(err.message || 'Failed to delete expense');
-      return { success: false, error: err.message || 'Failed to delete expense' };
-    } finally {
-      setLoading(false);
-    }
-  }, [currentUser]);
+  const deleteExpenseItem = useCallback(
+    async (expenseId) => {
+      if (!currentUser) return { success: false, error: 'Authentication required' };
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        await deleteExpense(currentUser.id, expenseId);
+        setExpenses((prev) => prev.filter((expense) => expense.id !== expenseId));
+        return { success: true };
+      } catch (err) {
+        console.error('Error deleting expense:', err);
+        setError(err.message || 'Failed to delete expense');
+        return { success: false, error: err.message || 'Failed to delete expense' };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [currentUser]
+  );
 
   // Change tax year
   const changeTaxYear = useCallback((taxYear) => {
@@ -117,7 +123,7 @@ export const ExpenseProvider = ({ children }) => {
         fetchExpenseTypes,
         addExpense: addExpenseItem,
         deleteExpense: deleteExpenseItem,
-        changeTaxYear
+        changeTaxYear,
       }}
     >
       {children}

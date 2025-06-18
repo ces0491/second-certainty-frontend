@@ -6,11 +6,11 @@
  * @returns {string} - Formatted currency
  */
 export const formatCurrency = (value, fractionDigits = 0) => {
-  return new Intl.NumberFormat('en-ZA', { 
-    style: 'currency', 
+  return new Intl.NumberFormat('en-ZA', {
+    style: 'currency',
     currency: 'ZAR',
     minimumFractionDigits: fractionDigits,
-    maximumFractionDigits: fractionDigits 
+    maximumFractionDigits: fractionDigits,
   }).format(value);
 };
 
@@ -22,19 +22,19 @@ export const formatCurrency = (value, fractionDigits = 0) => {
  */
 export const formatDate = (dateString, format = 'medium') => {
   if (!dateString) return '';
-  
+
   const date = new Date(dateString);
-  
-  const options = { 
+
+  const options = {
     year: 'numeric',
     month: format === 'short' ? 'short' : 'long',
-    day: 'numeric'
+    day: 'numeric',
   };
-  
+
   if (format === 'long') {
     options.weekday = 'long';
   }
-  
+
   return date.toLocaleDateString('en-ZA', options);
 };
 
