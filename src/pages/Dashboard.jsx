@@ -1,201 +1,26 @@
 // src/pages/Dashboard.jsx
-
-import React, { useEffect, useState, useMemo, lazy, Suspense } from 'react';
+import React, { useEffect } from 'react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
 import { useAuth } from '../hooks/useAuth';
 import { useIncome } from '../hooks/useIncome';
 import { useExpenses } from '../hooks/useExpenses';
 import { useTaxCalc } from '../hooks/useTaxCalc';
 import { formatCurrency, formatPercentage } from '../utils/formatters';
-import Loading from '../components/common/Loading';
 
-// Import chart configuration
-import { 
-  CHART_CONFIG, 
-  isChartsEnabled, 
-  shouldUseAlternativeChart,
-  shouldLogChartData,
-  getChartComponent 
-} from '../config/chartConfig';
-
-// Conditional chart imports based on configuration
-const WaterfallChart = lazy(() => 
-  import('../components/charts/WaterfallChart').catch(error => {
-    console.error('Failed to load WaterfallChart:', error);
-    return { default: () => <div className="p-4 text-red-600">Error loading waterfall chart</div> };
-  })
-);
-
-const AlternativeFinancialChart = lazy(() => 
-  import('../components/charts/AlternativeFinancialChart').catch(error => {
-    console.error('Failed to load AlternativeFinancialChart:', error);
-    return { default: () => <div className="p-4 text-red-600">Error loading alternative chart</div> };
-  })
-);
-
-// Simple Data Display Component (always available)
-const SimpleDataDisplay = ({ data, title }) => (
-  <div className="bg-white p-6 rounded-lg shadow">
-    <h3 className="text-lg font-semibold mb-4 text-gray-800">{title}</h3>
-    {data && data.length > 0 ? (
-      <div className="space-y-2">
-        {data.map((item, index) => (
-          <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-            <span className="text-gray-700">{item.name}</span>
-            <span className="font-medium text-gray-900">
-              {formatCurrency(Math.abs(item.value || item.y || 0))}
-              {(item.y && item.y < 0) && <span className="text-red-500 ml-1">(deduction)</span>}
-            </span>
-          </div>
-        ))}
-      </div>
-    ) : (
-      <p className="text-gray-500">No data available</p>
-    )}
-  </div>
-);
-
-// Chart Component Selector
-const ChartComponentSelector = ({ data, currentTaxYear, title }) => {
-  const chartType = getChartComponent();
-  
-  if (chartType === 'none' || chartType === 'SimpleDataDisplay') {
-    return <SimpleDataDisplay data={data} title={title} />;
-  }
-  
-  const ChartComponent = shouldUseAlternativeChart() ? AlternativeFinancialChart : WaterfallChart;
-  
-  return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <Suspense fallback={
-        <div className="h-96 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sc-green mx-auto mb-2"></div>
-            <p className="text-gray-600">Loading {shouldUseAlternativeChart() ? 'alternative' : 'waterfall'} chart...</p>
-          </div>
-        </div>
-      }>
-        <ChartComponent 
-          data={data} 
-          currentTaxYear={currentTaxYear}
-        />
-      </Suspense>
-    </div>
-  );
-};
-
-// Configuration Status Banner
-const ConfigStatusBanner = () => {
-  if (!isChartsEnabled()) {
-    return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-        <div className="flex items-center">
-          <span className="text-yellow-600 mr-2">⚠️</span>
-          <div>
-            <p className="text-yellow-800 font-medium">Charts Disabled</p>
-            <p className="text-yellow-700 text-sm">
-              Charts are disabled in chart configuration. Set ENABLE_CHARTS = true in chartConfig.js to enable.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
-  if (shouldUseAlternativeChart()) {
-    return (
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <div className="flex items-center">
-          <span className="text-blue-600 mr-2">ℹ️</span>
-          <div>
-            <p className="text-blue-800 font-medium">Using Alternative Charts</p>
-            <p className="text-blue-700 text-sm">
-              Using column charts instead of waterfall charts. Change USE_ALTERNATIVE_CHART to false in chartConfig.js to use waterfall charts.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
-  return null;
-};
-
-// Then in your Dashboard component, update the charts section:
-
-// Replace your existing charts section with this:
-{/* Charts Section with Configuration */}
-<ConfigStatusBanner />
-
-{isChartsEnabled() && showCharts && (
-  <div className="space-y-8">
-    {/* Financial Summary Chart */}
-    <ChartComponentSelector
-      data={chartData.waterfallData}
-      currentTaxYear={currentTaxYear}
-      title={`Financial Summary - ${currentTaxYear}`}
-    />
-
-    {/* Income and Expense Charts */}
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-medium text-gray-800 mb-4">
-          Income Sources - {currentTaxYear}
-        </h2>
-        <Suspense fallback={<div className="h-64 flex items-center justify-center"><Loading /></div>}>
-          <PieChartComponent 
-            data={chartData.incomeBreakdown}
-            emptyMessage="No income sources for this tax year."
-          />
-        </Suspense>
-      </div>
-
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-medium text-gray-800 mb-4">
-          Expense Breakdown - {currentTaxYear}
-        </h2>
-        <Suspense fallback={<div className="h-64 flex items-center justify-center"><Loading /></div>}>
-          <PieChartComponent 
-            data={chartData.expenseBreakdown}
-            emptyMessage="No expenses recorded for this tax year."
-          />
-        </Suspense>
-      </div>
-    </div>
-  </div>
-)}
-
-{!isChartsEnabled() && (
-  /* Simple Data Display as fallback */
-  <div className="space-y-6">
-    <SimpleDataDisplay 
-      data={chartData.waterfallData} 
-      title={`Financial Summary - ${currentTaxYear}`}
-    />
-    
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <SimpleDataDisplay 
-        data={chartData.incomeBreakdown} 
-        title={`Income Sources - ${currentTaxYear}`}
-      />
-      <SimpleDataDisplay 
-        data={chartData.expenseBreakdown} 
-        title={`Expense Breakdown - ${currentTaxYear}`}
-      />
-    </div>
-  </div>
-)}
-
-// Add debug logging if enabled
-{shouldLogChartData() && (
-  useEffect(() => {
-    console.log('📊 Chart Debug Data:', {
-      chartData,
-      taxCalculation,
-      calculatedData,
-      config: CHART_CONFIG
-    });
-  }, [chartData, taxCalculation, calculatedData])
-)}
+// Colors for charts
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -217,308 +42,140 @@ const Dashboard = () => {
     fetchTaxCalculation,
   } = useTaxCalc();
 
-  // Local state for better control
-  const [dataFetched, setDataFetched] = useState(false);
-  const [showCharts, setShowCharts] = useState(false);
-  const [chartErrors, setChartErrors] = useState({});
-  const [fetchErrors, setFetchErrors] = useState([]);
-
   // Available tax years for selection
   const TAX_YEARS = ['2025-2026', '2024-2025', '2023-2024', '2022-2023'];
+
+  // Track overall loading state
   const loading = incomesLoading || expensesLoading || taxLoading;
 
-  // Handle tax year change with complete reset
+  // Handle tax year change
   const handleTaxYearChange = (e) => {
-    console.log('Changing tax year to:', e.target.value);
-    setDataFetched(false);
-    setShowCharts(false);
-    setChartErrors({});
-    setFetchErrors([]);
     changeTaxYear(e.target.value);
   };
 
-  // Enhanced data fetching with individual error handling and delays
+  // Handle data fetching
   useEffect(() => {
-    if (!dataFetched && currentUser) {
-      const fetchData = async () => {
-        console.log('🚀 Starting data fetch sequence for dashboard');
-        const errors = [];
-        
-        try {
-          // Fetch incomes with delay
-          try {
-            console.log('📊 Fetching incomes...');
-            await fetchIncomes();
-            console.log('✅ Incomes fetched successfully');
-            // Small delay to reduce server load
-            await new Promise(resolve => setTimeout(resolve, 500));
-          } catch (err) {
-            console.error('❌ Failed to fetch incomes:', err);
-            errors.push(`Incomes: ${err.message}`);
-          }
-
-          // Fetch expenses with delay
-          try {
-            console.log('💰 Fetching expenses...');
-            await fetchExpenses();
-            console.log('✅ Expenses fetched successfully');
-            await new Promise(resolve => setTimeout(resolve, 500));
-          } catch (err) {
-            console.error('❌ Failed to fetch expenses:', err);
-            errors.push(`Expenses: ${err.message}`);
-          }
-
-          // Fetch tax calculation with delay
-          try {
-            console.log('🧮 Fetching tax calculation...');
-            await fetchTaxCalculation();
-            console.log('✅ Tax calculation fetched successfully');
-          } catch (err) {
-            console.error('❌ Failed to fetch tax calculation:', err);
-            errors.push(`Tax Calculation: ${err.message}`);
-          }
-
-          setFetchErrors(errors);
-          setDataFetched(true);
-          
-          // Only enable charts if configured and no critical errors
-          if (ENABLE_CHARTS && errors.length === 0) {
-            console.log('🎨 Enabling chart rendering in 2 seconds...');
-            setTimeout(() => {
-              setShowCharts(true);
-            }, 2000);
-          } else if (ENABLE_CHARTS && errors.length > 0) {
-            console.log('⚠️ Charts disabled due to data fetch errors');
-          }
-          
-        } catch (err) {
-          console.error('❌ Critical error in data fetch sequence:', err);
-          setFetchErrors(['Critical error: ' + err.message]);
-          setDataFetched(true);
-        }
-      };
-
-      fetchData();
-    }
-  }, [currentTaxYear, currentUser, dataFetched, fetchIncomes, fetchExpenses, fetchTaxCalculation]);
-
-  // Cleanup charts on unmount
-  useEffect(() => {
-    return () => {
-      if (window.Highcharts) {
-        window.Highcharts.charts.forEach(chart => {
-          if (chart) {
-            try {
-              chart.destroy();
-            } catch (e) {
-              console.warn('Error destroying chart:', e);
-            }
-          }
-        });
+    const fetchData = async () => {
+      try {
+        await fetchIncomes();
+        await fetchExpenses();
+        await fetchTaxCalculation();
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
       }
     };
-  }, []);
 
-  // Memoized calculations with error handling
-  const calculatedData = useMemo(() => {
-    try {
-      const totalIncome = incomes.reduce((sum, income) => sum + (Number(income.annual_amount) || 0), 0);
-      const totalExpenses = expenses.reduce((sum, expense) => sum + (Number(expense.amount) || 0), 0);
-      const monthlyTax = taxCalculation ? (Number(taxCalculation.final_tax) || 0) / 12 : 0;
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTaxYear]); // Re-fetch when tax year changes
 
-      console.log('📊 Calculated data:', { totalIncome, totalExpenses, monthlyTax });
+  // Generate financial summary data (income, expenses, tax, net income)
+  const generateFinancialSummary = () => {
+    if (!taxCalculation) return [];
 
-      return {
-        totalIncome,
-        totalExpenses,
-        monthlyTax,
-      };
-    } catch (error) {
-      console.error('❌ Error calculating data:', error);
-      return {
-        totalIncome: 0,
-        totalExpenses: 0,
-        monthlyTax: 0,
-      };
-    }
-  }, [incomes, expenses, taxCalculation]);
+    const totalExpenses = expenses?.reduce((sum, expense) => sum + (expense.amount || 0), 0) || 0;
+    const grossIncome = taxCalculation.gross_income || 0;
+    const taxLiability = taxCalculation.final_tax || 0;
+    const netIncome = grossIncome - taxLiability;
 
-  // Colors for charts
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+    return [
+      {
+        name: 'Gross Income',
+        value: grossIncome,
+        color: '#82ca9d', // Green
+      },
+      {
+        name: 'Expenses',
+        value: totalExpenses,
+        color: '#8884d8', // Purple
+      },
+      {
+        name: 'Tax Liability',
+        value: taxLiability,
+        color: '#ff8042', // Orange
+      },
+      {
+        name: 'Net Income',
+        value: netIncome,
+        color: '#0088FE', // Blue
+      },
+    ];
+  };
 
-  // Enhanced chart data generation with validation
-  const chartData = useMemo(() => {
-    if (!ENABLE_CHARTS) return { waterfallData: [], incomeBreakdown: [], expenseBreakdown: [] };
+  // Generate income breakdown data for pie chart
+  const getIncomeBreakdown = () => {
+    if (!incomes || incomes.length === 0) return [];
 
-    try {
-      console.log('🎨 Generating chart data...');
-      
-      // Generate waterfall chart data with validation
-      const generateWaterfallData = () => {
-        if (!taxCalculation) {
-          console.log('⚠️ No tax calculation data available for waterfall chart');
-          return [];
-        }
+    return incomes.map((income, index) => ({
+      name: income.source_type || 'Unknown',
+      value: income.annual_amount || 0,
+      color: COLORS[index % COLORS.length],
+    }));
+  };
 
-        try {
-          const grossIncome = Number(taxCalculation.gross_income) || 0;
-          const taxLiability = Number(taxCalculation.final_tax) || 0;
-          const totalExpenses = Number(calculatedData.totalExpenses) || 0;
-          
-          console.log('🎯 Waterfall chart inputs:', {
-            grossIncome,
-            totalExpenses,
-            taxLiability
-          });
+  // Generate expense breakdown data for pie chart
+  const getExpenseBreakdown = () => {
+    if (!expenses || expenses.length === 0) return [];
 
-          const waterfallData = [];
+    // Group expenses by type
+    const expensesByType = {};
+    expenses.forEach((expense) => {
+      const typeName = expense.expense_type?.name || 'Other';
+      if (!expensesByType[typeName]) {
+        expensesByType[typeName] = 0;
+      }
+      expensesByType[typeName] += expense.amount || 0;
+    });
 
-          // Starting point - Gross Income
-          if (grossIncome > 0) {
-            waterfallData.push({
-              name: 'Gross Income',
-              y: grossIncome,
-              color: '#10B981',
-            });
-          }
+    // Convert to array for chart
+    return Object.entries(expensesByType).map(([name, value], index) => ({
+      name,
+      value,
+      color: COLORS[index % COLORS.length],
+    }));
+  };
 
-          // Deductions - Expenses
-          if (totalExpenses > 0) {
-            waterfallData.push({
-              name: 'Deductible Expenses',
-              y: -totalExpenses,
-              color: '#8B5CF6',
-            });
-          }
-
-          // Deductions - Tax
-          if (taxLiability > 0) {
-            waterfallData.push({
-              name: 'Tax Liability',
-              y: -taxLiability,
-              color: '#EF4444',
-            });
-          }
-
-          // Final sum - Net Income
-          if (waterfallData.length > 0) {
-            waterfallData.push({
-              name: 'Net Income',
-              isSum: true,
-              color: '#3B82F6',
-            });
-          }
-
-          console.log('✅ Generated waterfall data:', waterfallData);
-          return waterfallData;
-          
-        } catch (error) {
-          console.error('❌ Error generating waterfall data:', error);
-          return [];
-        }
-      };
-
-      // Generate income breakdown data with validation
-      const getIncomeBreakdown = () => {
-        try {
-          if (!incomes || incomes.length === 0) return [];
-
-          return incomes.map((income, index) => ({
-            name: income.source_type || 'Unknown',
-            value: Number(income.annual_amount) || 0,
-            color: COLORS[index % COLORS.length],
-          })).filter(item => item.value > 0);
-        } catch (error) {
-          console.error('❌ Error generating income breakdown:', error);
-          return [];
-        }
-      };
-
-      // Generate expense breakdown data with validation
-      const getExpenseBreakdown = () => {
-        try {
-          if (!expenses || expenses.length === 0) return [];
-
-          const expensesByType = {};
-          expenses.forEach((expense) => {
-            const typeName = expense.expense_type?.name || 'Other';
-            const amount = Number(expense.amount) || 0;
-            if (amount > 0) {
-              if (!expensesByType[typeName]) {
-                expensesByType[typeName] = 0;
-              }
-              expensesByType[typeName] += amount;
-            }
-          });
-
-          return Object.entries(expensesByType).map(([name, value], index) => ({
-            name,
-            value,
-            color: COLORS[index % COLORS.length],
-          }));
-        } catch (error) {
-          console.error('❌ Error generating expense breakdown:', error);
-          return [];
-        }
-      };
-
-      const result = {
-        waterfallData: generateWaterfallData(),
-        incomeBreakdown: getIncomeBreakdown(),
-        expenseBreakdown: getExpenseBreakdown(),
-      };
-
-      console.log('✅ Chart data generated successfully:', result);
-      return result;
-      
-    } catch (error) {
-      console.error('❌ Error in chartData memoization:', error);
-      return {
-        waterfallData: [],
-        incomeBreakdown: [],
-        expenseBreakdown: [],
-      };
-    }
-  }, [taxCalculation, calculatedData.totalExpenses, incomes, expenses]);
-
-  // Show loading state only when actually loading
-  if (loading && !dataFetched) {
+  // Show loading state only when data is actually being fetched
+  if (loading && !taxCalculation) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sc-green mb-4"></div>
-          <p className="text-gray-600">Loading dashboard data...</p>
-          <p className="text-gray-500 text-sm mt-2">Tax Year: {currentTaxYear}</p>
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sc-green"></div>
         </div>
-        <ApiMonitor />
       </div>
     );
   }
 
   // Show empty state if no data
-  if (!taxCalculation && dataFetched && fetchErrors.length === 0) {
+  if (!taxCalculation) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Welcome to Second Certainty!</h2>
-          <p className="text-gray-500 mb-4">
-            No tax data available for tax year {currentTaxYear}. Get started by adding your income sources.
-          </p>
-          <a 
-            href="/income" 
-            className="bg-sc-green text-white px-4 py-2 rounded-md hover:bg-sc-green-700 transition-colors"
-          >
-            Add Income Sources
-          </a>
+          <p className="text-gray-500">Loading tax data for {currentTaxYear}...</p>
         </div>
-        <ApiMonitor />
       </div>
     );
   }
 
+  if (incomes.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <p className="text-gray-500">
+            No tax data available for tax year {currentTaxYear}. Please make sure you've added
+            income sources.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const financialSummary = generateFinancialSummary();
+  const incomeBreakdown = getIncomeBreakdown();
+  const expenseBreakdown = getExpenseBreakdown();
+
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Tax Dashboard</h1>
         <div className="flex items-center space-x-4">
@@ -545,194 +202,201 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Chart Status Banner */}
-      {!ENABLE_CHARTS && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center">
-            <span className="text-yellow-600 mr-2">⚠️</span>
-            <div>
-              <p className="text-yellow-800 font-medium">Charts Temporarily Disabled</p>
-              <p className="text-yellow-700 text-sm">
-                Charts are disabled for debugging. Set ENABLE_CHARTS = true in Dashboard.jsx to re-enable.
-                The app should work normally without charts.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Fetch Errors Display */}
-      {fetchErrors.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-          <h3 className="text-red-800 font-medium mb-2">Data Fetch Issues:</h3>
-          {fetchErrors.map((error, index) => (
-            <p key={index} className="text-red-700 text-sm">• {error}</p>
-          ))}
-          <button 
-            onClick={() => {
-              setDataFetched(false);
-              setFetchErrors([]);
-            }}
-            className="mt-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-          >
-            Retry Data Fetch
-          </button>
-        </div>
-      )}
-
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Gross Income Card */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center">
             <h2 className="text-sm font-medium text-gray-500">Gross Income</h2>
-            <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-6 h-6 text-green-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
             </svg>
           </div>
           <p className="text-2xl font-bold text-gray-800">
-            {formatCurrency(taxCalculation?.gross_income || 0)}
+            {formatCurrency(taxCalculation.gross_income || 0)}
           </p>
           <p className="text-sm text-gray-500">Tax Year: {currentTaxYear}</p>
         </div>
 
+        {/* Tax Liability Card */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center">
             <h2 className="text-sm font-medium text-gray-500">Tax Liability</h2>
-            <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+            <svg
+              className="w-6 h-6 text-red-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+              ></path>
             </svg>
           </div>
           <p className="text-2xl font-bold text-gray-800">
-            {formatCurrency(taxCalculation?.final_tax || 0)}
+            {formatCurrency(taxCalculation.final_tax || 0)}
           </p>
           <p className="text-sm text-gray-500">Tax Year: {currentTaxYear}</p>
         </div>
 
+        {/* Effective Tax Rate Card */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center">
             <h2 className="text-sm font-medium text-gray-500">Effective Tax Rate</h2>
-            <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+            <svg
+              className="w-6 h-6 text-blue-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"
+              ></path>
             </svg>
           </div>
           <p className="text-2xl font-bold text-gray-800">
-            {formatPercentage(taxCalculation?.effective_tax_rate || 0)}
+            {formatPercentage(taxCalculation.effective_tax_rate || 0)}
           </p>
           <p className="text-sm text-gray-500">Tax Year: {currentTaxYear}</p>
         </div>
 
+        {/* Monthly Tax Card */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center">
             <h2 className="text-sm font-medium text-gray-500">Monthly Tax</h2>
-            <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <svg
+              className="w-6 h-6 text-purple-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              ></path>
             </svg>
           </div>
           <p className="text-2xl font-bold text-gray-800">
-            {formatCurrency(calculatedData.monthlyTax)}
+            {formatCurrency((taxCalculation.final_tax || 0) / 12)}
           </p>
           <p className="text-sm text-gray-500">Average for {currentTaxYear}</p>
         </div>
       </div>
 
-      {/* Charts or Simple Data Display Section */}
-      {ENABLE_CHARTS && showCharts ? (
-        <div className="space-y-8">
-          {/* Financial Summary Waterfall Chart with Error Boundary */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <ChartErrorBoundary>
-              <Suspense fallback={
-                <div className="h-96 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sc-green mx-auto mb-2"></div>
-                    <p className="text-gray-600">Loading waterfall chart...</p>
-                  </div>
-                </div>
-              }>
-                <WaterfallChart 
-                  data={chartData.waterfallData} 
-                  currentTaxYear={currentTaxYear}
-                />
-              </Suspense>
-            </ChartErrorBoundary>
-          </div>
+      {/* Financial Summary Bar Chart */}
+      <div className="bg-white rounded-lg shadow p-6 mb-8">
+        <h2 className="text-xl font-medium text-gray-800 mb-4">
+          Financial Summary - {currentTaxYear}
+        </h2>
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={financialSummary}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip formatter={(value) => formatCurrency(value)} />
+              <Legend />
+              <Bar dataKey="value" name="Amount">
+                {financialSummary.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
-          {/* Pie Charts with Error Boundaries */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-medium text-gray-800 mb-4">
-                Income Sources - {currentTaxYear}
-              </h2>
-              <ChartErrorBoundary>
-                <Suspense fallback={<div className="h-64 flex items-center justify-center"><Loading /></div>}>
-                  <PieChartComponent 
-                    data={chartData.incomeBreakdown}
-                    emptyMessage="No income sources for this tax year."
-                  />
-                </Suspense>
-              </ChartErrorBoundary>
+      {/* Income Sources and Expense Breakdown Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Income Sources Pie Chart */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-medium text-gray-800 mb-4">
+            Income Sources - {currentTaxYear}
+          </h2>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={incomeBreakdown}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                >
+                  {incomeBreakdown.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => formatCurrency(value)} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Expense Breakdown Pie Chart */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-medium text-gray-800 mb-4">
+            Expense Breakdown - {currentTaxYear}
+          </h2>
+          {expenseBreakdown.length > 0 ? (
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={expenseBreakdown}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    nameKey="name"
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {expenseBreakdown.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => formatCurrency(value)} />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-medium text-gray-800 mb-4">
-                Expense Breakdown - {currentTaxYear}
-              </h2>
-              <ChartErrorBoundary>
-                <Suspense fallback={<div className="h-64 flex items-center justify-center"><Loading /></div>}>
-                  <PieChartComponent 
-                    data={chartData.expenseBreakdown}
-                    emptyMessage="No expenses recorded for this tax year."
-                  />
-                </Suspense>
-              </ChartErrorBoundary>
+          ) : (
+            <div className="h-64 flex items-center justify-center">
+              <p className="text-center text-gray-500">No expenses recorded for this tax year.</p>
             </div>
-          </div>
+          )}
         </div>
-      ) : (
-        /* Simple Data Display as fallback/alternative to charts */
-        <div className="space-y-6">
-          <SimpleDataDisplay 
-            data={chartData.waterfallData} 
-            title={`Financial Summary - ${currentTaxYear}`}
-          />
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SimpleDataDisplay 
-              data={chartData.incomeBreakdown} 
-              title={`Income Sources - ${currentTaxYear}`}
-            />
-            <SimpleDataDisplay 
-              data={chartData.expenseBreakdown} 
-              title={`Expense Breakdown - ${currentTaxYear}`}
-            />
-          </div>
-        </div>
-      )}
+      </div>
 
-      {/* Chart Errors Display */}
-      {Object.keys(chartErrors).length > 0 && (
-        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
-          <h3 className="text-yellow-800 font-medium">Chart Loading Issues:</h3>
-          {Object.entries(chartErrors).map(([chartType, error]) => (
-            <p key={chartType} className="text-yellow-700 text-sm">
-              {chartType}: {error}
-            </p>
-          ))}
-          <button 
-            onClick={() => {
-              setChartErrors({});
-              setShowCharts(false);
-              setTimeout(() => setShowCharts(true), 1000);
-            }}
-            className="mt-2 px-3 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700"
-          >
-            Retry Charts
-          </button>
-        </div>
-      )}
-
-      {/* Data Tables - Always show but simplified */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+      {/* Recent Income and Expenses Tables */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Income */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-6 py-4 border-b">
@@ -740,30 +404,50 @@ const Dashboard = () => {
           </div>
           <div className="p-6">
             {incomes.length > 0 ? (
-              <div className="space-y-2">
-                {incomes.slice(0, 5).map((income) => (
-                  <div key={income.id} className="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
-                    <div>
-                      <p className="font-medium text-gray-900">{income.source_type || 'Unknown'}</p>
-                      {income.description && <p className="text-sm text-gray-500">{income.description}</p>}
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-gray-900">{formatCurrency(income.annual_amount || 0)}</p>
-                      <p className="text-xs text-gray-500">
-                        {income.is_paye ? 'PAYE' : 'Non-PAYE'}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                {incomes.length > 5 && (
-                  <p className="text-sm text-gray-500 text-center pt-2">
-                    ... and {incomes.length - 5} more
-                  </p>
-                )}
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Source
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        PAYE
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {incomes.map((income) => (
+                      <tr key={income.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {income.source_type || 'Unknown'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatCurrency(income.annual_amount || 0)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {income.is_paye ? (
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                              Yes
+                            </span>
+                          ) : (
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                              No
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             ) : (
               <p className="text-gray-500">
-                No income sources found for this tax year.
+                No income sources found for this tax year. Add your first income source to get
+                started.
               </p>
             )}
           </div>
@@ -772,60 +456,53 @@ const Dashboard = () => {
         {/* Recent Expenses */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-6 py-4 border-b">
-            <h2 className="text-xl font-medium text-gray-800">Recent Expenses - {currentTaxYear}</h2>
+            <h2 className="text-xl font-medium text-gray-800">
+              Recent Expenses - {currentTaxYear}
+            </h2>
           </div>
           <div className="p-6">
             {expenses.length > 0 ? (
-              <div className="space-y-2">
-                {expenses.slice(0, 5).map((expense) => (
-                  <div key={expense.id} className="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {expense.expense_type ? expense.expense_type.name : 'Unknown'}
-                      </p>
-                      {expense.description && <p className="text-sm text-gray-500">{expense.description}</p>}
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-gray-900">{formatCurrency(expense.amount || 0)}</p>
-                    </div>
-                  </div>
-                ))}
-                {expenses.length > 5 && (
-                  <p className="text-sm text-gray-500 text-center pt-2">
-                    ... and {expenses.length - 5} more
-                  </p>
-                )}
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Description
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {expenses.map((expense) => (
+                      <tr key={expense.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {expense.expense_type ? expense.expense_type.name : 'Unknown'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {expense.description || 'No description'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatCurrency(expense.amount || 0)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             ) : (
               <p className="text-gray-500">
-                No expenses found for this tax year.
+                No expenses found for this tax year. Add your deductible expenses to potentially
+                reduce your tax liability.
               </p>
             )}
           </div>
         </div>
       </div>
-
-      {/* Debug Panel (only in development) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-          <h3 className="font-medium text-gray-800 mb-2">Debug Info</h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p><strong>Charts Enabled:</strong> {ENABLE_CHARTS ? 'Yes' : 'No'}</p>
-              <p><strong>Data Fetched:</strong> {dataFetched ? 'Yes' : 'No'}</p>
-              <p><strong>Charts Showing:</strong> {showCharts ? 'Yes' : 'No'}</p>
-            </div>
-            <div>
-              <p><strong>Incomes:</strong> {incomes.length}</p>
-              <p><strong>Expenses:</strong> {expenses.length}</p>
-              <p><strong>Tax Data:</strong> {taxCalculation ? 'Yes' : 'No'}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* API Monitor */}
-      <ApiMonitor />
     </div>
   );
 };
