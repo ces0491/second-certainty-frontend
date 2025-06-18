@@ -33,7 +33,7 @@ const Dashboard = () => {
     changeTaxYear(e.target.value);
   };
   
-  // Handle data fetching
+  // Handle data fetching with proper dependencies
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -74,33 +74,29 @@ const Dashboard = () => {
     const taxLiability = taxCalculation.final_tax || 0;
     const netIncome = grossIncome - totalExpenses - taxLiability;
     
-    // Create waterfall data with cumulative values
+    // Create waterfall data - using absolute values for better visualization
     return [
       {
         name: 'Gross Income',
         value: grossIncome,
-        cumulative: grossIncome,
         color: '#82ca9d',  // Green
         type: 'positive'
       },
       {
         name: 'Expenses',
-        value: -totalExpenses,
-        cumulative: grossIncome - totalExpenses,
+        value: totalExpenses,
         color: '#8884d8',  // Purple  
-        type: 'negative'
+        type: 'deduction'
       },
       {
         name: 'Tax Liability',
-        value: -taxLiability,
-        cumulative: grossIncome - totalExpenses - taxLiability,
+        value: taxLiability,
         color: '#ff8042',  // Orange
-        type: 'negative'
+        type: 'deduction'
       },
       {
         name: 'Net Income',
-        value: netIncome,
-        cumulative: netIncome,
+        value: Math.max(0, netIncome), // Ensure non-negative
         color: '#0088FE',  // Blue
         type: 'result'
       }
@@ -148,12 +144,9 @@ const Dashboard = () => {
         <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
           <p className="font-medium">{label}</p>
           <p className="text-sm">
-            Amount: <span className={data.type === 'negative' ? 'text-red-600' : 'text-green-600'}>
-              {formatCurrency(Math.abs(data.value))}
+            Amount: <span className="font-medium">
+              {formatCurrency(data.value)}
             </span>
-          </p>
-          <p className="text-sm">
-            Running Total: <span className="font-medium">{formatCurrency(data.cumulative)}</span>
           </p>
         </div>
       );
@@ -172,10 +165,22 @@ const Dashboard = () => {
   }
 
   // Show empty state if no data
-  if (!taxCalculation || !incomes || incomes.length === 0) {
+  if (!taxCalculation) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <p className="text-gray-500">No tax data available for tax year {currentTaxYear}. Please make sure you've added income sources.</p>
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <p className="text-gray-500">Loading tax data for {currentTaxYear}...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (incomes.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <p className="text-gray-500">No tax data available for tax year {currentTaxYear}. Please make sure you've added income sources.</p>
+        </div>
       </div>
     );
   }
@@ -274,7 +279,7 @@ const Dashboard = () => {
               <YAxis />
               <Tooltip content={<WaterfallTooltip />} />
               <Legend />
-              <Bar dataKey="cumulative" name="Amount">
+              <Bar dataKey="value" name="Amount">
                 {waterfallData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
@@ -283,7 +288,7 @@ const Dashboard = () => {
           </ResponsiveContainer>
         </div>
         <div className="mt-4 text-sm text-gray-600">
-          <p>This waterfall chart shows how your gross income flows to net income after expenses and taxes.</p>
+          <p>This chart shows your financial summary: starting with gross income, then deducting expenses and taxes to arrive at net income.</p>
         </div>
       </div>
       
