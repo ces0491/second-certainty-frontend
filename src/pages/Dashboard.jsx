@@ -2,8 +2,6 @@
 import React, { useEffect } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-// Import modules for additional chart types
-import HC_more from 'highcharts/modules/highcharts-more';
 import {
   PieChart,
   Pie,
@@ -16,9 +14,6 @@ import { useIncome } from '../hooks/useIncome';
 import { useExpenses } from '../hooks/useExpenses';
 import { useTaxCalc } from '../hooks/useTaxCalc';
 import { formatCurrency, formatPercentage } from '../utils/formatters';
-
-// Initialize Highcharts modules
-HC_more(Highcharts);
 
 // Colors for charts
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
