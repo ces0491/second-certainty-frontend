@@ -32,7 +32,7 @@ The Second Certainty frontend is a React-based application that provides an intu
 - **HTTP Client**: Axios 1.6.7
 - **State Management**: React Context API
 - **Styling**: Tailwind CSS 3.4.1
-- **Data Visualization**: Recharts 2.12.0
+- **Data Visualization**: Recharts 2.12.0, Highcharts 11.2.0
 - **Build Tools**: Create React App
 
 ## Project Structure

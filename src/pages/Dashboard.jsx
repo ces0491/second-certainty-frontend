@@ -1,23 +1,24 @@
 // src/pages/Dashboard.jsx
 import React, { useEffect } from 'react';
+import Highcharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
+// Import modules for additional chart types
+import HC_more from 'highcharts/modules/highcharts-more';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
+  Tooltip,
+  ResponsiveContainer,
 } from 'recharts';
 import { useAuth } from '../hooks/useAuth';
 import { useIncome } from '../hooks/useIncome';
 import { useExpenses } from '../hooks/useExpenses';
 import { useTaxCalc } from '../hooks/useTaxCalc';
 import { formatCurrency, formatPercentage } from '../utils/formatters';
+
+// Initialize Highcharts modules
+HC_more(Highcharts);
 
 // Colors for charts
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
@@ -69,37 +70,172 @@ const Dashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTaxYear]); // Re-fetch when tax year changes
 
-  // Generate financial summary data (income, expenses, tax, net income)
-  const generateFinancialSummary = () => {
+  // Generate waterfall chart data for financial summary
+  const generateWaterfallData = () => {
     if (!taxCalculation) return [];
 
     const totalExpenses = expenses?.reduce((sum, expense) => sum + (expense.amount || 0), 0) || 0;
     const grossIncome = taxCalculation.gross_income || 0;
     const taxLiability = taxCalculation.final_tax || 0;
-    const netIncome = grossIncome - taxLiability;
 
     return [
       {
         name: 'Gross Income',
-        value: grossIncome,
-        color: '#82ca9d', // Green
+        y: grossIncome,
+        color: '#10B981', // Green
       },
       {
-        name: 'Expenses',
-        value: totalExpenses,
-        color: '#8884d8', // Purple
+        name: 'Deductible Expenses',
+        y: -totalExpenses,
+        color: '#8B5CF6', // Purple
       },
       {
         name: 'Tax Liability',
-        value: taxLiability,
-        color: '#ff8042', // Orange
+        y: -taxLiability,
+        color: '#EF4444', // Red
       },
       {
         name: 'Net Income',
-        value: netIncome,
-        color: '#0088FE', // Blue
+        isSum: true,
+        color: '#3B82F6', // Blue
       },
     ];
+  };
+
+  // Configure Highcharts waterfall chart options
+  const getWaterfallChartOptions = () => {
+    const waterfallData = generateWaterfallData();
+    
+    return {
+      chart: {
+        type: 'waterfall',
+        height: 400,
+        backgroundColor: 'transparent',
+        style: {
+          fontFamily: 'Inter, system-ui, sans-serif'
+        }
+      },
+      title: {
+        text: `Financial Summary - ${currentTaxYear}`,
+        style: {
+          fontSize: '20px',
+          fontWeight: '600',
+          color: '#1F2937',
+        },
+      },
+      subtitle: {
+        text: 'Income flow from gross income to net income',
+        style: {
+          fontSize: '14px',
+          color: '#6B7280',
+        },
+      },
+      xAxis: {
+        type: 'category',
+        labels: {
+          style: {
+            color: '#6B7280',
+            fontSize: '12px',
+          },
+        },
+        lineColor: '#E5E7EB',
+      },
+      yAxis: {
+        title: {
+          text: 'Amount (ZAR)',
+          style: {
+            color: '#6B7280',
+            fontSize: '12px',
+          },
+        },
+        labels: {
+          formatter: function() {
+            return formatCurrency(this.value);
+          },
+          style: {
+            color: '#6B7280',
+            fontSize: '11px',
+          },
+        },
+        gridLineColor: '#F3F4F6',
+      },
+      legend: {
+        enabled: false,
+      },
+      tooltip: {
+        pointFormatter: function() {
+          let value = this.y;
+          if (this.isSum || this.isIntermediateSum) {
+            value = this.total;
+          }
+          return `<b>${formatCurrency(Math.abs(value))}</b>`;
+        },
+        backgroundColor: 'rgba(255, 255, 255, 0.98)',
+        borderColor: '#E5E7EB',
+        borderRadius: 8,
+        shadow: {
+          color: 'rgba(0, 0, 0, 0.1)',
+          offsetX: 0,
+          offsetY: 2,
+          opacity: 0.1,
+          width: 4
+        },
+        style: {
+          fontSize: '12px'
+        }
+      },
+      plotOptions: {
+        waterfall: {
+          dataLabels: {
+            enabled: true,
+            formatter: function() {
+              let value = this.y;
+              if (this.isSum || this.isIntermediateSum) {
+                value = this.total;
+              }
+              return formatCurrency(Math.abs(value));
+            },
+            style: {
+              fontWeight: '600',
+              color: '#374151',
+              textOutline: '1px contrast',
+              fontSize: '11px',
+            },
+            verticalAlign: 'top',
+            y: -10,
+          },
+          borderColor: '#FFFFFF',
+          borderWidth: 2,
+          borderRadius: 4,
+        },
+      },
+      series: [{
+        upColor: '#10B981', // Positive values - emerald green
+        color: '#EF4444', // Negative values - red  
+        data: waterfallData,
+        pointPadding: 0.1,
+        groupPadding: 0.2,
+      }],
+      credits: {
+        enabled: false,
+      },
+      responsive: {
+        rules: [{
+          condition: {
+            maxWidth: 500
+          },
+          chartOptions: {
+            plotOptions: {
+              waterfall: {
+                dataLabels: {
+                  enabled: false
+                }
+              }
+            }
+          }
+        }]
+      }
+    };
   };
 
   // Generate income breakdown data for pie chart
@@ -170,7 +306,6 @@ const Dashboard = () => {
     );
   }
 
-  const financialSummary = generateFinancialSummary();
   const incomeBreakdown = getIncomeBreakdown();
   const expenseBreakdown = getExpenseBreakdown();
 
@@ -305,26 +440,18 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Financial Summary Bar Chart */}
+      {/* Financial Summary Waterfall Chart */}
       <div className="bg-white rounded-lg shadow p-6 mb-8">
-        <h2 className="text-xl font-medium text-gray-800 mb-4">
-          Financial Summary - {currentTaxYear}
-        </h2>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={financialSummary}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip formatter={(value) => formatCurrency(value)} />
-              <Legend />
-              <Bar dataKey="value" name="Amount">
-                {financialSummary.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+        <HighchartsReact
+          highcharts={Highcharts}
+          options={getWaterfallChartOptions()}
+        />
+        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Understanding Your Financial Flow</h3>
+          <p className="text-xs text-gray-600">
+            This waterfall chart shows how your gross income flows to your net income after deductions and taxes. 
+            Green bars represent positive amounts, red bars represent deductions, and the final blue bar shows your net income.
+          </p>
         </div>
       </div>
 
