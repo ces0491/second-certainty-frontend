@@ -1,5 +1,5 @@
 // src/pages/Login.jsx
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { pingServer } from '../api/index';
@@ -9,14 +9,40 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
   const [isWakingUp, setIsWakingUp] = useState(false);
+  const [serverWarningShown, setServerWarningShown] = useState(false);
   const { login, loading } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const message = location.state?.message;
+  const pingAttempted = useRef(false);
 
+  // Optimize server ping - only ping on user interaction, not on mount
+  const handleServerWakeup = async () => {
+    if (pingAttempted.current) return;
+    pingAttempted.current = true;
+
+    setIsWakingUp(true);
+    try {
+      const isOnline = await pingServer();
+      if (!isOnline && !serverWarningShown) {
+        setServerWarningShown(true);
+      }
+    } catch (err) {
+      console.warn('Server ping failed:', err);
+      if (!serverWarningShown) {
+        setServerWarningShown(true);
+      }
+    } finally {
+      setIsWakingUp(false);
+    }
+  };
+
+  // Ping server when user starts typing (lazy ping)
   useEffect(() => {
-    pingServer(); // Wake up the server early
-  }, []);
+    if ((email || password) && !pingAttempted.current) {
+      handleServerWakeup();
+    }
+  }, [email, password, serverWarningShown]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,10 +64,9 @@ const Login = () => {
     try {
       console.log('Submitting login form for:', email);
 
-      // Show message for potential cold start
-      if (!isWakingUp) {
-        setIsWakingUp(true);
-        setTimeout(() => setIsWakingUp(false), 15000); // Show for 15 seconds
+      // Ping server if not already done
+      if (!pingAttempted.current) {
+        await handleServerWakeup();
       }
 
       const result = await login(email.trim(), password);
@@ -91,8 +116,6 @@ const Login = () => {
       }
 
       setFormError(errorMessage);
-    } finally {
-      setIsWakingUp(false);
     }
   };
 
@@ -126,14 +149,28 @@ const Login = () => {
           </div>
         )}
 
+        {/* Only show server warning if there's an issue */}
+        {serverWarningShown && (
+          <div
+            className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative"
+            role="alert"
+          >
+            <span className="block sm:inline">
+              ⚠️ The server may take 30-60 seconds to respond on first visit (free hosting).
+            </span>
+          </div>
+        )}
+
+        {/* Show loading indicator only when actively waking up server */}
         {isWakingUp && (
           <div
             className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative"
             role="alert"
           >
-            <span className="block sm:inline">
-              🔄 Server is starting up (this may take up to 60 seconds on first visit)...
-            </span>
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700 mr-2"></div>
+              <span className="block sm:inline">Checking server status...</span>
+            </div>
           </div>
         )}
 
@@ -176,10 +213,22 @@ const Login = () => {
           <div>
             <button
               type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-sc-green hover:bg-sc-green/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sc-green disabled:opacity-50"
+              disabled={loading || isWakingUp}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-sc-green hover:bg-sc-green/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sc-green disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Signing in...
+                </div>
+              ) : isWakingUp ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Preparing...
+                </div>
+              ) : (
+                'Sign in'
+              )}
             </button>
           </div>
 
@@ -191,6 +240,13 @@ const Login = () => {
             </div>
           </div>
         </form>
+
+        {/* Performance tip */}
+        <div className="text-center">
+          <p className="text-xs text-gray-500">
+            💡 Tip: After first login, the app will load much faster on subsequent visits.
+          </p>
+        </div>
       </div>
     </div>
   );
