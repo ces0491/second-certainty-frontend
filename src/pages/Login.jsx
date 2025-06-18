@@ -1,5 +1,5 @@
 // src/pages/Login.jsx
-import React, { useState, useContext, useEffect, useRef } from 'react';
+import React, { useState, useContext, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { pingServer } from '../api/index';
@@ -17,7 +17,7 @@ const Login = () => {
   const pingAttempted = useRef(false);
 
   // Optimize server ping - only ping on user interaction, not on mount
-  const handleServerWakeup = async () => {
+  const handleServerWakeup = useCallback(async () => {
     if (pingAttempted.current) return;
     pingAttempted.current = true;
 
@@ -35,14 +35,14 @@ const Login = () => {
     } finally {
       setIsWakingUp(false);
     }
-  };
+  }, [serverWarningShown]);
 
   // Ping server when user starts typing (lazy ping)
   useEffect(() => {
     if ((email || password) && !pingAttempted.current) {
       handleServerWakeup();
     }
-  }, [email, password, serverWarningShown]);
+  }, [email, password, handleServerWakeup]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

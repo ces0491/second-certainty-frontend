@@ -37,9 +37,7 @@ The Second Certainty frontend is a React-based application that provides an intu
 - **HTTP Client**: Axios 1.6.7 with interceptors
 - **State Management**: React Context API with custom hooks
 - **Styling**: Tailwind CSS 3.4.1 with custom design system
-- **Data Visualization**: 
-  - Highcharts 11.2.0 (waterfall charts, advanced features)
-  - Recharts 2.12.0 (pie charts, simple visualizations)
+- **Data Visualization**: Recharts 2.12.0 (pie charts, simple visualizations)
 - **Build Tools**: Create React App 5.0.1
 - **Testing**: React Testing Library, Jest
 - **Code Quality**: ESLint, Prettier
@@ -334,7 +332,6 @@ Tax rates, brackets, and thresholds are updated annually based on SARS (South Af
 - Verify all dependencies are properly installed
 
 **Chart Rendering Issues:**
-- Ensure Highcharts dependencies are installed
 - Check browser console for JavaScript errors
 - Verify chart data format matches expected structure
 
@@ -351,4 +348,4 @@ For support and questions:
 
 ---
 
-**Disclaimer**: This application is for educational purposes as part of ECO5040 - Financial Software Engineering Assignment. It is not intended as official tax advice. Please consult a registered tax practitioner for professional tax guidance.
+**Disclaimer**: This application is for demonstration purposes ONLY, as part of a Financial Software Engineering assignment. It is not intended as official tax advice. Please consult a registered tax practitioner for professional tax guidance.
