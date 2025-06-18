@@ -1,4 +1,5 @@
 // src/pages/ProvisionalTax.jsx
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useTaxCalc } from '../hooks/useTaxCalc';
@@ -54,6 +55,38 @@ const ProvisionalTax = () => {
   if (loading && !refreshing) {
     return <Loading />;
   }
+  
+  // Helper function to safely extract payment data
+  const getPaymentData = (payment) => {
+    if (!payment) return { amount: 0, due_date: null };
+    
+    // Handle new structure: { amount: number, due_date: string }
+    if (typeof payment === 'object' && payment.amount !== undefined) {
+      return {
+        amount: safeNumber(payment.amount),
+        due_date: payment.due_date
+      };
+    }
+    
+    // Handle old structure: just a number
+    if (typeof payment === 'number') {
+      return {
+        amount: safeNumber(payment),
+        due_date: null
+      };
+    }
+    
+    return { amount: 0, due_date: null };
+  };
+  
+  // Extract payment data safely
+  const firstPayment = getPaymentData(provisionalTax?.first_payment);
+  const secondPayment = getPaymentData(provisionalTax?.second_payment);
+  
+  // Get total tax - handle both 'total_tax' and 'annual_tax' properties
+  const totalTax = safeNumber(provisionalTax?.total_tax || provisionalTax?.annual_tax || 0);
+  const taxableIncome = safeNumber(provisionalTax?.taxable_income || 0);
+  const effectiveRate = safeNumber(provisionalTax?.effective_tax_rate || 0);
   
   return (
     <div className="container mx-auto px-4 py-8">
@@ -127,16 +160,15 @@ const ProvisionalTax = () => {
                 <div>
                   <p className="text-sm text-gray-600">Due Date</p>
                   <p className="text-lg font-semibold text-gray-800">
-                    {provisionalTax.first_payment && provisionalTax.first_payment.due_date
-                      ? formatDate(provisionalTax.first_payment.due_date)
+                    {firstPayment.due_date 
+                      ? formatDate(firstPayment.due_date)
                       : 'Not available'}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-gray-600">Amount</p>
                   <p className="text-2xl font-bold text-sc-green-600">
-                    {/* Fixed missing bracket in formatCurrency call */}
-                    {formatCurrency(provisionalTax?.first_payment?.amount || 0)}
+                    {formatCurrency(firstPayment.amount)}
                   </p>
                 </div>
               </div>
@@ -145,8 +177,7 @@ const ProvisionalTax = () => {
                 <p className="text-sm text-gray-600">
                   This payment represents 50% of your estimated annual tax liability.
                 </p>
-                {provisionalTax.first_payment && provisionalTax.first_payment.due_date && 
-                  new Date(provisionalTax.first_payment.due_date) < new Date() && (
+                {firstPayment.due_date && new Date(firstPayment.due_date) < new Date() && (
                   <div className="mt-2 bg-red-100 text-red-600 p-2 rounded">
                     <p className="text-sm font-medium">This payment is now overdue.</p>
                   </div>
@@ -165,16 +196,15 @@ const ProvisionalTax = () => {
                 <div>
                   <p className="text-sm text-gray-600">Due Date</p>
                   <p className="text-lg font-semibold text-gray-800">
-                    {provisionalTax.second_payment && provisionalTax.second_payment.due_date
-                      ? formatDate(provisionalTax.second_payment.due_date)
+                    {secondPayment.due_date 
+                      ? formatDate(secondPayment.due_date)
                       : 'Not available'}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-gray-600">Amount</p>
                   <p className="text-2xl font-bold text-sc-green-600">
-                    {/* Fixed: proper formatting for second payment amount */}
-                    {formatCurrency(provisionalTax?.second_payment?.amount || 0)}
+                    {formatCurrency(secondPayment.amount)}
                   </p>
                 </div>
               </div>
@@ -183,8 +213,7 @@ const ProvisionalTax = () => {
                 <p className="text-sm text-gray-600">
                   This payment represents the remaining 50% of your estimated annual tax liability.
                 </p>
-                {provisionalTax.second_payment && provisionalTax.second_payment.due_date && 
-                  new Date(provisionalTax.second_payment.due_date) < new Date() && (
+                {secondPayment.due_date && new Date(secondPayment.due_date) < new Date() && (
                   <div className="mt-2 bg-red-100 text-red-600 p-2 rounded">
                     <p className="text-sm font-medium">This payment is now overdue.</p>
                   </div>
@@ -203,31 +232,46 @@ const ProvisionalTax = () => {
                 <div>
                   <p className="text-sm text-gray-600">Total Annual Tax</p>
                   <p className="text-xl font-bold text-gray-800">
-                    {/* Fixed: proper formatting for total tax */}
-                    {formatCurrency(provisionalTax?.total_tax || 0)}
+                    {formatCurrency(totalTax)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Taxable Income</p>
                   <p className="text-xl font-bold text-gray-800">
-                    {/* Fixed: proper formatting for taxable income */}
-                    {formatCurrency(provisionalTax?.taxable_income || 0)}
+                    {formatCurrency(taxableIncome)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Effective Tax Rate</p>
                   <p className="text-xl font-bold text-gray-800">
-                    {provisionalTax?.effective_tax_rate !== undefined
-                      ? (safeNumber(provisionalTax.effective_tax_rate) * 100).toFixed(2) + '%'
-                      : '0.00%'}
+                    {(effectiveRate * 100).toFixed(2)}%
                   </p>
                 </div>
               </div>
               
-              <div className="mt-6 bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
-                <p className="font-bold">Important Note</p>
-                <p>These calculations are estimates based on your current income and expense data. Actual tax liability may vary.</p>
-              </div>
+              {/* Show debug information if all values are zero */}
+              {totalTax === 0 && taxableIncome === 0 && (
+                <div className="mt-6 bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
+                  <p className="font-bold">No Tax Calculation Available</p>
+                  <p>Your provisional tax shows zero because:</p>
+                  <ul className="list-disc pl-5 mt-2">
+                    <li>You may not have income sources for the {currentTaxYear} tax year</li>
+                    <li>Your income may be below the tax threshold</li>
+                    <li>There may be an issue with the tax calculation</li>
+                  </ul>
+                  <p className="mt-2">
+                    <strong>Solution:</strong> Add income sources for {currentTaxYear} on the Income page, 
+                    then refresh this calculation.
+                  </p>
+                </div>
+              )}
+              
+              {totalTax > 0 && (
+                <div className="mt-6 bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
+                  <p className="font-bold">Important Note</p>
+                  <p>These calculations are estimates based on your current income and expense data. Actual tax liability may vary.</p>
+                </div>
+              )}
               
               <div className="mt-6">
                 <h3 className="text-md font-medium text-gray-800 mb-2">Payment Methods</h3>
