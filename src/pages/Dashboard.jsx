@@ -1,12 +1,10 @@
 // src/pages/Dashboard.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useAuth } from '../hooks/useAuth';
 import { useIncome } from '../hooks/useIncome';
 import { useExpenses } from '../hooks/useExpenses'; 
 import { useTaxCalc } from '../hooks/useTaxCalc';
-import Loading from '../components/common/Loading';
-import Alert from '../components/common/Alert';
 import { formatCurrency, formatPercentage } from '../utils/formatters';
 
 // Colors for charts
@@ -21,19 +19,15 @@ const Dashboard = () => {
   // Available tax years for selection
   const TAX_YEARS = ['2025-2026', '2024-2025', '2023-2024', '2022-2023'];
   
-  // Add forcedLoading state to prevent infinite loading
-  const [forcedLoading, setForcedLoading] = useState(true);
-  
-  // Track overall loading and error states
+  // Track overall loading state
   const loading = incomesLoading || expensesLoading || taxLoading;
-  const error = incomesError || expensesError || taxError;
   
   // Handle tax year change
   const handleTaxYearChange = (e) => {
     changeTaxYear(e.target.value);
   };
   
-  // Handle data fetching with proper dependencies
+  // Handle data fetching
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -48,22 +42,6 @@ const Dashboard = () => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTaxYear]); // Re-fetch when tax year changes
-  
-  // Add a timeout for the loading state
-  useEffect(() => {
-    let timeout;
-    if (loading) {
-      timeout = setTimeout(() => {
-        // Force exit loading state after 10 seconds
-        setForcedLoading(false);
-      }, 10000);
-    } else {
-      // When loading completes normally, also exit forced loading
-      setForcedLoading(false);
-    }
-    
-    return () => clearTimeout(timeout);
-  }, [loading]);
   
   // Generate financial summary data (income, expenses, tax, net income)
   const generateFinancialSummary = () => {
@@ -130,6 +108,17 @@ const Dashboard = () => {
       color: COLORS[index % COLORS.length]
     }));
   };
+
+  // Show loading state only when data is actually being fetched
+  if (loading && !taxCalculation) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sc-green"></div>
+        </div>
+      </div>
+    );
+  }
 
   // Show empty state if no data
   if (!taxCalculation) {
@@ -235,7 +224,7 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* Financial Summary Bar Chart - Full Width */}
+      {/* Financial Summary Bar Chart */}
       <div className="bg-white rounded-lg shadow p-6 mb-8">
         <h2 className="text-xl font-medium text-gray-800 mb-4">Financial Summary - {currentTaxYear}</h2>
         <div className="h-64">

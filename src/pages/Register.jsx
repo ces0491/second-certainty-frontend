@@ -63,11 +63,21 @@ const Register = () => {
     }
 
     // Check if person is at least 16 years old
-    const age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    const birthYear = birthDate.getFullYear();
+    const birthMonth = birthDate.getMonth();
+    const birthDay = birthDate.getDate();
+    
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+    const currentDay = today.getDate();
+    
+    let age = currentYear - birthYear;
+    
+    // Adjust age if birthday hasn't occurred this year
+    if (currentMonth < birthMonth || (currentMonth === birthMonth && currentDay < birthDay)) {
       age--;
     }
+    
     if (age < 16) {
       setFormError('You must be at least 16 years old to register');
       return false;

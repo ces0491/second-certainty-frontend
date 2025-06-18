@@ -12,10 +12,8 @@ export const IncomeProvider = ({ children }) => {
   const [currentTaxYear, setCurrentTaxYear] = useState('2025-2026');
   const { currentUser } = useContext(AuthContext);
 
-  // Use useCallback for fetchIncomes to prevent infinite loops
   const fetchIncomes = useCallback(async () => {
     if (!currentUser) return;
-    if (loading) return; // Still check loading, but don't depend on it
     
     setLoading(true);
     try {
@@ -41,7 +39,6 @@ export const IncomeProvider = ({ children }) => {
   }, [currentUser, currentTaxYear]);
 
   // Effect to fetch incomes when user or tax year changes
-  // Fixed ESLint warning by adding fetchIncomes dependency
   useEffect(() => {
     if (currentUser) {
       fetchIncomes();

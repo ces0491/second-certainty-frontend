@@ -1,6 +1,6 @@
 // src/pages/ProvisionalTax.jsx
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useTaxCalc } from '../hooks/useTaxCalc';
 import Loading from '../components/common/Loading';
@@ -27,8 +27,8 @@ const ProvisionalTax = () => {
     changeTaxYear(e.target.value);
   };
   
-  // Manual refresh function
-  const handleRefresh = async () => {
+  // Manual refresh function with useCallback
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     setLastError('');
     try {
@@ -41,14 +41,14 @@ const ProvisionalTax = () => {
     } finally {
       setRefreshing(false);
     }
-  };
+  }, [fetchProvisionalTax]);
   
   useEffect(() => {
     if (currentUser?.is_provisional_taxpayer) {
       console.log('Fetching provisional tax for user:', currentUser.id, 'tax year:', currentTaxYear);
       fetchProvisionalTax();
     }
-  }, [currentTaxYear, currentUser]);
+  }, [currentTaxYear, currentUser, fetchProvisionalTax]);
   
   if (!currentUser?.is_provisional_taxpayer) {
     return (
