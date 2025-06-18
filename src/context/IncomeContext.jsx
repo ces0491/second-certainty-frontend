@@ -48,7 +48,6 @@ export const IncomeProvider = ({ children }) => {
     }
   }, [currentUser, currentTaxYear, fetchIncomes]); 
 
-  // Other methods can be converted to useCallback too for consistency
   const addIncomeItem = useCallback(async (incomeData) => {
     setLoading(true);
     setError(null);

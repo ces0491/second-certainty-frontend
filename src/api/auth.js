@@ -39,7 +39,7 @@ api.interceptors.response.use(
 );
 
 /**
- * User login - FIXED to use correct endpoint and format
+ * User login
  */
 export const login = async (email, password) => {
   try {
@@ -71,7 +71,7 @@ export const login = async (email, password) => {
 };
 
 /**
- * User registration - FIXED format
+ * User registration
  */
 export const register = async (userData) => {
   try {
@@ -83,7 +83,6 @@ export const register = async (userData) => {
   }
 };
 
-// Rest of the functions remain the same...
 export const getCurrentUser = async () => {
   try {
     const response = await api.get('/auth/me');

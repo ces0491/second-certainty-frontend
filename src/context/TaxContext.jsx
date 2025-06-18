@@ -38,7 +38,7 @@ export const TaxProvider = ({ children }) => {
     }
   }, [currentUser, currentTaxYear]);
 
-  // Enhanced fetchProvisionalTax function with better error handling
+  // Get Provisional Tax
   const fetchProvisionalTax = useCallback(async () => {
     if (!currentUser) {
       console.log('No current user, skipping provisional tax calculation');
@@ -60,7 +60,7 @@ export const TaxProvider = ({ children }) => {
       
       console.log('Provisional tax calculation result:', data);
       
-      // Validate the data structure - be more lenient
+      // Validate the data structure
       if (data && typeof data === 'object') {
         // Check if we have some data, even if not complete
         const hasValidData = 

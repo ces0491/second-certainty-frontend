@@ -1,7 +1,7 @@
 // src/api/index.js
 import axios from 'axios';
 
-// Use the correct API URL
+// API URL
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://second-certainty-api.onrender.com/api';
 
 const api = axios.create({

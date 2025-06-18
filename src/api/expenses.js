@@ -72,7 +72,7 @@ export const getExpenseTypes = async () => {
     const response = await api.get('/tax/deductible-expenses/');
     return response.data;
   } catch (error) {
-    // Return empty array as fallback instead of throwing
+    // Return empty array as fallback
     console.error('Failed to fetch expense types:', error);
     return [];
   }

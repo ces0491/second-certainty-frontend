@@ -1,4 +1,4 @@
-// src/pages/ProvisionalTax.jsx - FIXED VERSION
+// src/pages/ProvisionalTax.jsx
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
@@ -88,7 +88,7 @@ const ProvisionalTax = () => {
     return { amount: 0, due_date: null };
   };
   
-  // Calculate due dates if not provided by backend
+  // Calculate due dates
   const calculateDueDates = (taxYear) => {
     const yearParts = taxYear.split('-');
     const startYear = parseInt(yearParts[0]);

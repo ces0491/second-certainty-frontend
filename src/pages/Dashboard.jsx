@@ -1,4 +1,4 @@
-// src/pages/Dashboard.jsx - Complete rewrite
+// src/pages/Dashboard.jsx
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useAuth } from '../hooks/useAuth';
@@ -33,7 +33,7 @@ const Dashboard = () => {
     changeTaxYear(e.target.value);
   };
   
-  // Handle data fetching with proper dependencies
+  // Handle data fetching
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -65,35 +65,44 @@ const Dashboard = () => {
     return () => clearTimeout(timeout);
   }, [loading]);
   
-  // Generate financial summary data (income, expenses, tax, net income)
-  const generateFinancialSummary = () => {
+  // Generate waterfall chart data for financial flow
+  const generateWaterfallData = () => {
     if (!taxCalculation) return [];
     
     const totalExpenses = expenses?.reduce((sum, expense) => sum + (expense.amount || 0), 0) || 0;
     const grossIncome = taxCalculation.gross_income || 0;
     const taxLiability = taxCalculation.final_tax || 0;
-    const netIncome = grossIncome - taxLiability;
+    const netIncome = grossIncome - totalExpenses - taxLiability;
     
+    // Create waterfall data with cumulative values
     return [
       {
         name: 'Gross Income',
         value: grossIncome,
-        color: '#82ca9d'  // Green
+        cumulative: grossIncome,
+        color: '#82ca9d',  // Green
+        type: 'positive'
       },
       {
         name: 'Expenses',
-        value: totalExpenses,
-        color: '#8884d8'  // Purple
+        value: -totalExpenses,
+        cumulative: grossIncome - totalExpenses,
+        color: '#8884d8',  // Purple  
+        type: 'negative'
       },
       {
         name: 'Tax Liability',
-        value: taxLiability,
-        color: '#ff8042'  // Orange
+        value: -taxLiability,
+        cumulative: grossIncome - totalExpenses - taxLiability,
+        color: '#ff8042',  // Orange
+        type: 'negative'
       },
       {
         name: 'Net Income',
         value: netIncome,
-        color: '#0088FE'  // Blue
+        cumulative: netIncome,
+        color: '#0088FE',  // Blue
+        type: 'result'
       }
     ];
   };
@@ -131,6 +140,27 @@ const Dashboard = () => {
     }));
   };
 
+  // Custom tooltip for waterfall chart
+  const WaterfallTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
+          <p className="font-medium">{label}</p>
+          <p className="text-sm">
+            Amount: <span className={data.type === 'negative' ? 'text-red-600' : 'text-green-600'}>
+              {formatCurrency(Math.abs(data.value))}
+            </span>
+          </p>
+          <p className="text-sm">
+            Running Total: <span className="font-medium">{formatCurrency(data.cumulative)}</span>
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   // Show loading only if still in loading state and forcedLoading is true
   if (loading && forcedLoading) {
     return <Loading />;
@@ -150,7 +180,7 @@ const Dashboard = () => {
     );
   }
 
-  const financialSummary = generateFinancialSummary();
+  const waterfallData = generateWaterfallData();
   const incomeBreakdown = getIncomeBreakdown();
   const expenseBreakdown = getExpenseBreakdown();
 
@@ -233,30 +263,33 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Financial Summary Bar Chart - IMPROVED */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-medium text-gray-800 mb-4">Financial Summary - {currentTaxYear}</h2>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={financialSummary}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip formatter={(value) => formatCurrency(value)} />
-                <Legend />
-                <Bar dataKey="value" name="Amount">
-                  {financialSummary.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+      {/* Financial Summary Waterfall Chart - Full Width */}
+      <div className="bg-white rounded-lg shadow p-6 mb-8">
+        <h2 className="text-xl font-medium text-gray-800 mb-4">Financial Summary - {currentTaxYear}</h2>
+        <div className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={waterfallData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip content={<WaterfallTooltip />} />
+              <Legend />
+              <Bar dataKey="cumulative" name="Amount">
+                {waterfallData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
-        
-        {/* Income Breakdown Pie Chart */}
+        <div className="mt-4 text-sm text-gray-600">
+          <p>This waterfall chart shows how your gross income flows to net income after expenses and taxes.</p>
+        </div>
+      </div>
+      
+      {/* Income Sources and Expense Breakdown Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Income Sources Pie Chart */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-medium text-gray-800 mb-4">Income Sources - {currentTaxYear}</h2>
           <div className="h-64">
@@ -282,37 +315,39 @@ const Dashboard = () => {
             </ResponsiveContainer>
           </div>
         </div>
-      </div>
-      
-      {/* New Section: Expense Breakdown */}
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
-        <h2 className="text-xl font-medium text-gray-800 mb-4">Expense Breakdown - {currentTaxYear}</h2>
-        {expenseBreakdown.length > 0 ? (
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={expenseBreakdown}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                  nameKey="name"
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                >
-                  {expenseBreakdown.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => formatCurrency(value)} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        ) : (
-          <p className="text-center text-gray-500 py-8">No expenses recorded for this tax year.</p>
-        )}
+        
+        {/* Expense Breakdown Pie Chart */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-medium text-gray-800 mb-4">Expense Breakdown - {currentTaxYear}</h2>
+          {expenseBreakdown.length > 0 ? (
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={expenseBreakdown}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    nameKey="name"
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {expenseBreakdown.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => formatCurrency(value)} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="h-64 flex items-center justify-center">
+              <p className="text-center text-gray-500">No expenses recorded for this tax year.</p>
+            </div>
+          )}
+        </div>
       </div>
       
       {/* Recent Income and Expenses Tables */}
