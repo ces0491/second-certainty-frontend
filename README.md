@@ -17,10 +17,7 @@ The Second Certainty frontend is a React-based application that provides an intu
 ## Features
 
 - **User Authentication**: Secure JWT-based login and registration with profile management
-- **Interactive Dashboard**: Overview of tax situation with advanced visualizations including:
-  - Waterfall chart showing financial flow from gross income to net income
-  - Pie charts for income and expense breakdowns
-  - Real-time tax year filtering
+- **Interactive Dashboard**: Overview of tax situation with visualizations for income, expenses and overall tax position
 - **Income Management**: Track multiple income sources with PAYE indicators
 - **Expense Management**: Record and categorize tax-deductible expenses with type validation
 - **Tax Calculator**: Calculate tax liability with real-time updates and custom scenarios
